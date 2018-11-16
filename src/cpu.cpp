@@ -26,7 +26,7 @@ cpu::cpu() {
       0xF0, 0x80, 0xF0, 0x80, 0x80   // F
   };
 
-  std::copy(font_set.begin(), font_set.end(), _memory.begin() + 0x50);
+  std::copy(font_set.begin(), font_set.end(), _memory.begin());
 }
 
 void cpu::load(const std::string& rom_file) {
@@ -376,6 +376,7 @@ void cpu::ld_ST_Vx(opcode_t opcode) {
 
 // ADD I, Vx - set I = I + Vx [0xFx1E]
 void cpu::add_I_Vx(opcode_t opcode) {
+  // _V[0xF] = (_I + _V[opcode.x] > 0xFFF);
   _I += _V[opcode.x];
 
   _pc += 2;
