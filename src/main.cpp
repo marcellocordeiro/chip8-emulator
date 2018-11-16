@@ -25,6 +25,7 @@ constexpr auto cpu_clock = 840.f;
 }  // namespace cte
 
 void render(const std::array<bool, cte::gfx_size>& gfx, sf::RenderWindow& window) {
+  window.clear();
   sf::RectangleShape rectangle(sf::Vector2f(cte::scale, cte::scale));
 
   for (int y = 0; y < cte::screen_height; ++y) {
@@ -35,6 +36,8 @@ void render(const std::array<bool, cte::gfx_size>& gfx, sf::RenderWindow& window
       }
     }
   }
+
+  window.display();
 }
 
 void update_keys(std::array<bool, cte::keys_size>& keys) {
@@ -66,6 +69,10 @@ int main() {
   // auto rom_path = std::filesystem::current_path().parent_path() / "roms" / rom_file;
   chip8.load(rom_file);
 
+#ifdef _WIN32
+  ShowWindow(GetConsoleWindow(), SW_HIDE);
+#endif
+
   sf::RenderWindow window(sf::VideoMode(cte::screen_width * cte::res_scale, cte::screen_height * cte::res_scale), "this shit doesn't work");
   window.setFramerateLimit(cte::fps_limit);
   window.clear();
@@ -77,6 +84,7 @@ int main() {
   try {
     while (window.isOpen()) {
       sf::Event event;
+
       while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
           window.close();
@@ -92,9 +100,7 @@ int main() {
         update_keys(chip8.get_keys());
 
         if (chip8.get_draw()) {
-          window.clear();
           render(chip8.get_gfx(), window);
-          window.display();
         }
 
         clock.restart();
