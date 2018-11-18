@@ -8,23 +8,10 @@
 #include <iostream>
 #include <sstream>
 
+#include "common.hpp"
 #include "random.h"
 
-namespace cte {
-// graphics
-constexpr auto screen_width = 64;
-constexpr auto screen_height = 32;
-constexpr auto char_size = 5;
-constexpr auto pixels_per_byte = 8;
-
-// array sizes
-constexpr auto gfx_size = screen_width * screen_height;
-constexpr auto keys_size = 16;
-constexpr auto memory_size = 4096;
-constexpr auto stack_size = 16;
-constexpr auto V_size = 16;
-}  // namespace cte
-
+namespace chip8 {
 class cpu {
 public:
   cpu();
@@ -124,3 +111,4 @@ private:
   void opcode_0xE(opcode_t opcode);
   void opcode_0xF(opcode_t opcode);
 };
+}

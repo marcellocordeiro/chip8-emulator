@@ -1,5 +1,6 @@
 #include "cpu.h"
 
+namespace chip8 {
 void print_error(const std::string& error, uint16_t opcode = 0x0000) {
   std::stringstream ss;
   ss << std::hex << std::showbase << std::internal << std::setfill('0') << +opcode;
@@ -63,7 +64,7 @@ void cpu::cycle() {
   const uint16_t raw_opcode = _memory[_pc] << 8 | _memory[_pc + 1];
   const opcode_t opcode = {raw_opcode};
 
-  std::cout << "[opcode] " << std::hex << std::showbase << std::internal << std::setfill('0') << +opcode.raw << std::endl;
+  // std::cout << "[opcode] " << std::hex << std::showbase << std::internal << std::setfill('0') << +opcode.raw << std::endl;
 
   switch (opcode.main) {
     case 0x0:
@@ -118,8 +119,6 @@ void cpu::cycle() {
       print_error("[opcode not found]", opcode.raw);
       break;
   }
-
-  cycle_timers();
 }
 
 void cpu::cycle_timers() {
@@ -128,9 +127,7 @@ void cpu::cycle_timers() {
   }
 
   if (_sound_timer > 0) {
-    if (_sound_timer == 1) {
-      _beep = true;
-    }
+    _beep = (_sound_timer == 1);
 
     --_sound_timer;
   }
@@ -513,4 +510,5 @@ void cpu::opcode_0xF(opcode_t opcode) {
       print_error("[opcode not found]", opcode.raw);
       break;
   }
+}
 }

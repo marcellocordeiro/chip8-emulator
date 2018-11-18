@@ -18,7 +18,7 @@ if (GNU OR Clang)
     endif()
 endif()
 
-if(MSVC)
+if (MSVC)
     set(CMAKE_CXX_STANDARD 17)
 
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
@@ -28,13 +28,12 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
 endif()
 
-#######################
-######## SFML #########
-#######################
+######################
+######## SFML ########
+######################
 
 set(SFML_INSTALL_DIR ${CMAKE_BINARY_DIR}/external/SFML)
 
-# if (NOT EXISTS ${SFML_INSTALL_DIR})
 include(ExternalProject)
 find_package(Git REQUIRED)
 
@@ -44,20 +43,20 @@ ExternalProject_Add(
     GIT_TAG 2.5.1
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${SFML_INSTALL_DIR}
 )
-# endif()
 
 # ExternalProject_Get_Property(SFML SFML_INSTALL_DIR)
-# message("SFML DIR = ${SFML_INSTALL_DIR}")
 include_directories(${SFML_INSTALL_DIR}/include)
 link_directories(${SFML_INSTALL_DIR}/lib)
 
-#######################
+######################
 
 file(GLOB SOURCE_FILES
     "src/*.h"
     "src/*.cpp"
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+######################
 
 add_dependencies(${PROJECT_NAME} SFML)
 
