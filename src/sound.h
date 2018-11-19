@@ -2,7 +2,8 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
-#include <vector>
+#include <array>
+#include <cmath>
 
 #include "common.hpp"
 

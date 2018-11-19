@@ -2,15 +2,14 @@
 
 namespace chip8 {
 sound::sound() {
-  std::vector<sf::Int16> wavetable;
-  for (float i = 0.f; i < cte::stepCount; ++i) {
-    wavetable.push_back(static_cast<sf::Int16>(std::sin(cte::step * i) * cte::amplitude));
+  std::array<sf::Int16, cte::samples> wavetable;
+
+  for (std::size_t i = 0; i < wavetable.size(); ++i) {
+    wavetable[i] = static_cast<sf::Int16>(std::sin(i * cte::two_pi * cte::step) * cte::amplitude);
   }
 
-  // sf::SoundBuffer;
-  _buffer.loadFromSamples(wavetable.data(), wavetable.size(), 1u, static_cast<sf::Uint32>(cte::updateRate));
+  _buffer.loadFromSamples(wavetable.data(), wavetable.size(), 1, cte::sampling_rate);
 
-  // sf::Sound;
   _sound.setBuffer(_buffer);
   _sound.setLoop(true);
 

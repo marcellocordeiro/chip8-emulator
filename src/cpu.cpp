@@ -49,8 +49,8 @@ bool cpu::get_beep() const {
   return _beep;
 }
 
-std::array<bool, cte::keys_size>& cpu::get_keys() {
-  return _keys;
+void cpu::update_keys() {
+  _keys.update_keys();
 }
 
 const std::array<bool, cte::gfx_size>& cpu::get_gfx() const {

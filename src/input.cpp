@@ -1,23 +1,128 @@
 #include "input.h"
 
-void update_keys(std::array<bool, cte::keys_size>& keys) {
-  keys[0] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num1);
-  keys[1] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num2);
-  keys[2] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num3);
-  keys[3] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Num4);
+namespace chip8 {
+input::input() {
+  // clang-format off
+  const std::unordered_map<std::string, sf::Keyboard::Key> key_bindings = {
+    {"Unknown",   sf::Keyboard::Key::Unknown},
+    {"A",         sf::Keyboard::Key::A},
+    {"B",         sf::Keyboard::Key::B},
+    {"C",         sf::Keyboard::Key::C},
+    {"D",         sf::Keyboard::Key::D},
+    {"E",         sf::Keyboard::Key::E},
+    {"F",         sf::Keyboard::Key::F},
+    {"G",         sf::Keyboard::Key::G},
+    {"H",         sf::Keyboard::Key::H},
+    {"I",         sf::Keyboard::Key::I},
+    {"J",         sf::Keyboard::Key::J},
+    {"K",         sf::Keyboard::Key::K},
+    {"L",         sf::Keyboard::Key::L},
+    {"M",         sf::Keyboard::Key::M},
+    {"N",         sf::Keyboard::Key::N},
+    {"O",         sf::Keyboard::Key::O},
+    {"P",         sf::Keyboard::Key::P},
+    {"Q",         sf::Keyboard::Key::Q},
+    {"R",         sf::Keyboard::Key::R},
+    {"S",         sf::Keyboard::Key::S},
+    {"T",         sf::Keyboard::Key::T},
+    {"U",         sf::Keyboard::Key::U},
+    {"V",         sf::Keyboard::Key::V},
+    {"W",         sf::Keyboard::Key::W},
+    {"X",         sf::Keyboard::Key::X},
+    {"Y",         sf::Keyboard::Key::Y},
+    {"Z",         sf::Keyboard::Key::Z},
+    {"Num0",      sf::Keyboard::Key::Num0},
+    {"Num1",      sf::Keyboard::Key::Num1},
+    {"Num2",      sf::Keyboard::Key::Num2},
+    {"Num3",      sf::Keyboard::Key::Num3},
+    {"Num4",      sf::Keyboard::Key::Num4},
+    {"Num5",      sf::Keyboard::Key::Num5},
+    {"Num6",      sf::Keyboard::Key::Num6},
+    {"Num7",      sf::Keyboard::Key::Num7},
+    {"Num8",      sf::Keyboard::Key::Num8},
+    {"Num9",      sf::Keyboard::Key::Num9},
+    {"Escape",    sf::Keyboard::Key::Escape},
+    {"LControl",  sf::Keyboard::Key::LControl},
+    {"LShift",    sf::Keyboard::Key::LShift},
+    {"LAlt",      sf::Keyboard::Key::LAlt},
+    {"LSystem",   sf::Keyboard::Key::LSystem},
+    {"RControl",  sf::Keyboard::Key::RControl},
+    {"RShift",    sf::Keyboard::Key::RShift},
+    {"RAlt",      sf::Keyboard::Key::RAlt},
+    {"RSystem",   sf::Keyboard::Key::RSystem},
+    {"Menu",      sf::Keyboard::Key::Menu},
+    {"LBracket",  sf::Keyboard::Key::LBracket},
+    {"RBracket",  sf::Keyboard::Key::RBracket},
+    {"Semicolon", sf::Keyboard::Key::Semicolon},
+    {"Comma",     sf::Keyboard::Key::Comma},
+    {"Period",    sf::Keyboard::Key::Period},
+    {"Quote",     sf::Keyboard::Key::Quote},
+    {"Slash",     sf::Keyboard::Key::Slash},
+    {"Backslash", sf::Keyboard::Key::Backslash},
+    {"Tilde",     sf::Keyboard::Key::Tilde},
+    {"Equal",     sf::Keyboard::Key::Equal},
+    {"Hyphen",    sf::Keyboard::Key::Hyphen},
+    {"Space",     sf::Keyboard::Key::Space},
+    {"Enter",     sf::Keyboard::Key::Enter},
+    {"Backspace", sf::Keyboard::Key::Backspace},
+    {"Tab",       sf::Keyboard::Key::Tab},
+    {"PageUp",    sf::Keyboard::Key::PageUp},
+    {"PageDown",  sf::Keyboard::Key::PageDown},
+    {"End",       sf::Keyboard::Key::End},
+    {"Home",      sf::Keyboard::Key::Home},
+    {"Insert",    sf::Keyboard::Key::Insert},
+    {"Delete",    sf::Keyboard::Key::Delete},
+    {"Add",       sf::Keyboard::Key::Add},
+    {"Subtract",  sf::Keyboard::Key::Subtract},
+    {"Multiply",  sf::Keyboard::Key::Multiply},
+    {"Divide",    sf::Keyboard::Key::Divide},
+    {"Left",      sf::Keyboard::Key::Left},
+    {"Right",     sf::Keyboard::Key::Right},
+    {"Up",        sf::Keyboard::Key::Up},
+    {"Down",      sf::Keyboard::Key::Down},
+    {"Numpad0",   sf::Keyboard::Key::Numpad0},
+    {"Numpad1",   sf::Keyboard::Key::Numpad1},
+    {"Numpad2",   sf::Keyboard::Key::Numpad2},
+    {"Numpad3",   sf::Keyboard::Key::Numpad3},
+    {"Numpad4",   sf::Keyboard::Key::Numpad4},
+    {"Numpad5",   sf::Keyboard::Key::Numpad5},
+    {"Numpad6",   sf::Keyboard::Key::Numpad6},
+    {"Numpad7",   sf::Keyboard::Key::Numpad7},
+    {"Numpad8",   sf::Keyboard::Key::Numpad8},
+    {"Numpad9",   sf::Keyboard::Key::Numpad9},
+    {"F1",        sf::Keyboard::Key::F1},
+    {"F2",        sf::Keyboard::Key::F2},
+    {"F3",        sf::Keyboard::Key::F3},
+    {"F4",        sf::Keyboard::Key::F4},
+    {"F5",        sf::Keyboard::Key::F5},
+    {"F6",        sf::Keyboard::Key::F6},
+    {"F7",        sf::Keyboard::Key::F7},
+    {"F8",        sf::Keyboard::Key::F8},
+    {"F9",        sf::Keyboard::Key::F9},
+    {"F10",       sf::Keyboard::Key::F10},
+    {"F11",       sf::Keyboard::Key::F11},
+    {"F12",       sf::Keyboard::Key::F12},
+    {"F13",       sf::Keyboard::Key::F13},
+    {"F14",       sf::Keyboard::Key::F14},
+    {"F15",       sf::Keyboard::Key::F15},
+    {"Pause",     sf::Keyboard::Key::Pause}
+  };
 
-  keys[4] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q);
-  keys[5] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
-  keys[6] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::E);
-  keys[7] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R);
-
-  keys[8] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
-  keys[9] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
-  keys[10] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
-  keys[11] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::F);
-
-  keys[12] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z);
-  keys[13] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X);
-  keys[14] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C);
-  keys[15] = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::V);
+  mapping = {key_bindings.at("Num1"), key_bindings.at("Num2"), key_bindings.at("Num3"), key_bindings.at("Num4"),
+             key_bindings.at("Q"),    key_bindings.at("W"),    key_bindings.at("E"),    key_bindings.at("R"),
+             key_bindings.at("A"),    key_bindings.at("S"),    key_bindings.at("D"),    key_bindings.at("F"),
+             key_bindings.at("Z"),    key_bindings.at("X"),    key_bindings.at("C"),    key_bindings.at("V")
+  };
+  // clang-format on
 }
+
+void input::update_keys() {
+  for (std::size_t i = 0; i < cte::keys_size; ++i) {
+    keys[i] = sf::Keyboard::isKeyPressed(mapping[i]);
+  }
+}
+
+bool input::operator[](std::size_t i) {
+  return keys[i];
+}
+}  // namespace chip8

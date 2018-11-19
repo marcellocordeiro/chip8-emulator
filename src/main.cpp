@@ -38,9 +38,9 @@ int main() {
         cycle_timer.restart();
       }
 
-      if (timers_timer.elapsed_time() >= 1.0f / cte::fps_limit) {
+      if (timers_timer.elapsed_time() >= 1.0f / cte::cpu_counters_clock) {
         cpu.cycle_timers();
-        update_keys(cpu.get_keys());
+        cpu.update_keys();
         display.render(cpu.get_gfx());
 
         if (cpu.get_beep()) {

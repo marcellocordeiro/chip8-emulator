@@ -3,7 +3,7 @@
 namespace cte {
 // cpu
 constexpr auto cpu_clock = 840.0f;
-// constexpr auto cpu_counters_clock = 60.f;
+constexpr auto cpu_counters_clock = 60.0f;
 
 // graphics
 constexpr auto scale = 20.0f;
@@ -15,11 +15,11 @@ constexpr auto char_size = 5;
 constexpr auto pixels_per_byte = 8;
 
 // audio
-constexpr auto frequency = 880.0f;
-constexpr auto updateRate = 22100.0f;
-constexpr auto amplitude = 16000.0f;
-constexpr auto stepCount = updateRate / frequency;
-constexpr auto step = (6.284f) / stepCount;
+constexpr auto samples = 44100;
+constexpr auto sampling_rate = 44100;
+constexpr auto amplitude = 30000;
+constexpr auto step = 440.0f / sampling_rate;
+constexpr auto two_pi = 6.28318530718f;
 
 // array sizes
 constexpr auto gfx_size = screen_width * screen_height;

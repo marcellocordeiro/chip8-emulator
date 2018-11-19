@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "common.hpp"
+#include "input.h"
 #include "random.h"
 
 namespace chip8 {
@@ -19,7 +20,7 @@ public:
   void cycle();
   void cycle_timers();
   const std::array<bool, cte::gfx_size>& get_gfx() const;
-  std::array<bool, 16>& get_keys();
+  void update_keys();
   bool get_draw() const;
   bool get_beep() const;
 
@@ -54,7 +55,7 @@ private:
   uint8_t _sp = 0;  // stack pointer
 
   // keys
-  std::array<bool, cte::keys_size> _keys = {};
+  chip8::input _keys = {};
 
   // misc registers
   std::array<uint8_t, cte::V_size> _V = {};
