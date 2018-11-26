@@ -12,7 +12,8 @@ bool display::is_open() {
   return _window.isOpen();
 }
 
-void display::poll_events() {
+actions display::poll_events() {
+  auto action = actions::NONE;
   sf::Event event;
 
   while (_window.pollEvent(event)) {
@@ -23,7 +24,13 @@ void display::poll_events() {
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
       _window.close();
     }
+
+    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1) {
+      action = actions::RESET;
+    }
   }
+
+  return action;
 }
 
 void display::render(const std::array<bool, cte::gfx_size>& gfx) {

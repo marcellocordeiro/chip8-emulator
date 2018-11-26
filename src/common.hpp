@@ -28,3 +28,5 @@ constexpr auto memory_size = 4096;
 constexpr auto stack_size = 16;
 constexpr auto V_size = 16;
 }  // namespace cte
+
+enum class actions { NONE, RESET };

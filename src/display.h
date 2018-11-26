@@ -11,8 +11,8 @@ public:
   display();
   void render(const std::array<bool, cte::gfx_size>&);
 
+  actions poll_events();
   bool is_open();
-  void poll_events();
   void close();
 
 private:

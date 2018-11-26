@@ -30,7 +30,14 @@ int main() {
 
   try {
     while (display.is_open()) {
-      display.poll_events();
+      switch (display.poll_events()) {
+        case actions::NONE:
+          break;
+        case actions::RESET:
+          cpu = chip8::cpu();
+          cpu.load(rom_file.string());
+          break;
+      }
 
       if (cycle_timer.elapsed_time() >= 1.0f / cte::cpu_clock) {
         cpu.cycle();
