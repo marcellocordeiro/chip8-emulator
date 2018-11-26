@@ -4,6 +4,10 @@ void message_box(const char* message) {
 #ifdef _WIN32
   MessageBox(NULL, message, "Error!", MB_OK);
 #endif
+
+#ifdef __linux__
+  std::cout << message << std::endl;
+#endif
 }
 
 void hide_console() {

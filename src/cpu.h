@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -30,6 +31,13 @@ public:
   bool get_beep() const;
 
 private:
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#elif defined(__clang__) && !defined(_MSC_VER)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#endif
   // opcode splitting
   union opcode_t {
     uint16_t raw;
@@ -47,6 +55,11 @@ private:
       uint8_t x : 4;
     };
   };
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#elif defined(__clang__) && !defined(_MSC_VER)
+#pragma clang diagnostic pop
+#endif
 
   // gfx
   std::array<bool, cte::gfx_size> _gfx = {};
@@ -75,7 +88,7 @@ private:
   bool _beep = false;
 
   // random
-  random _rng;
+  chip8::random _rng;
 
   // instructions
   void cls();

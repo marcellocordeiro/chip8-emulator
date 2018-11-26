@@ -59,7 +59,7 @@ int main() {
         timers_timer.restart();
       }
     }
-  } catch (std::exception e) {
+  } catch (std::exception& e) {
     display.close();
     message_box(e.what());
   }

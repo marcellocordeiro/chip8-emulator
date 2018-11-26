@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional> */
 
+namespace chip8 {
 class random {
 public:
   /* static  */ uint8_t gen();
@@ -16,3 +17,4 @@ private:
   static inline std::mt19937 mt{rd()};
   static inline std::uniform_int_distribution<int> dist{0, 7};
 };
+}  // namespace chip8

@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(chip8-emulator)
+project(chip8-emulator VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib)
 
+######################
+#    Source files    #
 ######################
 
 file(GLOB SOURCE_FILES
@@ -14,13 +16,14 @@ file(GLOB SOURCE_FILES
 )
 
 ######################
-######## SFML ########
+#        SFML        #
 ######################
 
-set(SFML_INSTALL_DIR ${CMAKE_BINARY_DIR}/external/SFML)
+find_package(Git REQUIRED)
 
 include(ExternalProject)
-find_package(Git REQUIRED)
+
+set(SFML_INSTALL_DIR ${CMAKE_BINARY_DIR}/external/SFML)
 
 ExternalProject_Add(
     SFML
@@ -37,31 +40,33 @@ include_directories(${SFML_INSTALL_DIR}/include)
 link_directories(${SFML_INSTALL_DIR}/lib)
 
 ######################
+#     Executable     #
+######################
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 add_dependencies(${PROJECT_NAME} SFML)
-target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio sfml-system)
 
 ######################
+#   Compiler flags   #
+######################
 
-if(GNU OR Clang)
-    target_link_libraries(${PROJECT_NAME} stdc++fs)
+set_target_properties(
+    ${PROJECT_NAME}
+    PROPERTIES CXX_STANDARD 17
+               CXX_STANDARD_REQUIRED YES
+               CXX_EXTENSIONS NO
+)
 
-    target_compile_options(${PROJECT_NAME} PRIVATE -std=c++17)
-
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic-errors)
-    target_compile_options(${PROJECT_NAME} PRIVATE -m64)
-
-    if(UNIX)
-        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined,address)
-    endif()
+if(
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
+)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
 endif()
 
 if(MSVC)
-    # target_compile_options(${PROJECT_NAME} PRIVATE /std:c++latest)
-    target_compile_options(${PROJECT_NAME} PRIVATE /std:c++17)
-
     string(REGEX REPLACE "/W[0-9]" "/W4" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
     target_compile_options(${PROJECT_NAME} PRIVATE /WX)
     target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
@@ -73,3 +78,21 @@ if(MSVC)
     # target_compile_options(${PROJECT_NAME} PRIVATE /Zc:referenceBinding)
     # target_compile_options(${PROJECT_NAME} PRIVATE /Zc:stringStrings)
 endif()
+
+##################
+# Link libraries #
+##################
+
+if(UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined,address)
+    target_link_libraries(${PROJECT_NAME} asan ubsan)
+endif()
+
+if(
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
+)
+    target_link_libraries(${PROJECT_NAME} stdc++fs)
+endif()
+
+target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio sfml-system)
