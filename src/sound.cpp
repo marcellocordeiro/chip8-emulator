@@ -13,7 +13,7 @@ sound::sound() {
   _sound.setBuffer(_buffer);
   _sound.setLoop(true);
 
-  _sound.setVolume(_sound.getVolume() * 0.5);
+  _sound.setVolume(_sound.getVolume() * 0.5f);
 }
 
 void sound::play() {

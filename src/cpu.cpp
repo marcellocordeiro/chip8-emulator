@@ -348,7 +348,7 @@ void cpu::ld_Vx_DT(opcode_t opcode) {
 
 // LD Vx, K - wait for a key press, store the value of the key in Vx [0xFx0A]
 void cpu::ld_Vx_K(opcode_t opcode) {
-  for (int i = 0; i < cte::keys_size; ++i) {
+  for (uint8_t i = 0; i < cte::keys_size; ++i) {
     if (_keys[i]) {
       _V[opcode.x] = i;
       _pc += 2;

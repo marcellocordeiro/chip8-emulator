@@ -12,6 +12,11 @@
 #include "input.h"
 #include "random.h"
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#pragma warning(disable : 4201)  // nonstandard extension used: nameless struct/union
+#pragma warning(disable : 4834)  // discarding return value of function with 'nodiscard' attribute
+#endif
+
 namespace chip8 {
 class cpu {
 public:
@@ -34,12 +39,12 @@ private:
       uint16_t main : 4;
     };
 
-    uint16_t kk : 8;
+    uint8_t kk : 8;
 
     struct {
-      uint16_t n : 4;
-      uint16_t y : 4;
-      uint16_t x : 4;
+      uint8_t n : 4;
+      uint8_t y : 4;
+      uint8_t x : 4;
     };
   };
 
@@ -112,4 +117,4 @@ private:
   void opcode_0xE(opcode_t opcode);
   void opcode_0xF(opcode_t opcode);
 };
-}
+}  // namespace chip8

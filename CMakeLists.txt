@@ -6,27 +6,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/build)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/lib)
 
-if (GNU OR Clang)
-    set(CMAKE_CXX_STANDARD 17)
+######################
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -pedantic-errors")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-
-    if (UNIX)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=undefined,address")
-    endif()
-endif()
-
-if (MSVC)
-    set(CMAKE_CXX_STANDARD 17)
-
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
-    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
-    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:referenceBinding /Zc:rvalueCast /Zc:stringStrings")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /diagnostics:caret")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zi")
-endif()
+file(GLOB SOURCE_FILES
+    "src/*.h"
+    "src/*.cpp"
+)
 
 ######################
 ######## SFML ########
@@ -45,25 +30,46 @@ ExternalProject_Add(
 )
 
 # ExternalProject_Get_Property(SFML SFML_INSTALL_DIR)
+# set(SFML_DIR "build/external/lib/cmake/SFML")
+# find_package(SFML COMPONENTS window graphics audio REQUIRED)
+
 include_directories(${SFML_INSTALL_DIR}/include)
 link_directories(${SFML_INSTALL_DIR}/lib)
 
 ######################
 
-file(GLOB SOURCE_FILES
-    "src/*.h"
-    "src/*.cpp"
-)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+add_dependencies(${PROJECT_NAME} SFML)
+target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio sfml-system)
 
 ######################
 
-add_dependencies(${PROJECT_NAME} SFML)
-
-# set(SFML_DIR "build/external/lib/cmake/SFML")
-# find_package(SFML COMPONENTS window graphics audio REQUIRED)
-target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio sfml-system)
-
-if (GNU OR Clang)
+if(GNU OR Clang)
     target_link_libraries(${PROJECT_NAME} stdc++fs)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE -std=c++17)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic-errors)
+    target_compile_options(${PROJECT_NAME} PRIVATE -m64)
+
+    if(UNIX)
+        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined,address)
+    endif()
+endif()
+
+if(MSVC)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /std:c++latest)
+    target_compile_options(${PROJECT_NAME} PRIVATE /std:c++17)
+
+    string(REGEX REPLACE "/W[0-9]" "/W4" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    target_compile_options(${PROJECT_NAME} PRIVATE /WX)
+    target_compile_options(${PROJECT_NAME} PRIVATE /permissive-)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE /diagnostics:caret)
+    target_compile_options(${PROJECT_NAME} PRIVATE /Zi)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE /Zc:rvalueCast)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /Zc:referenceBinding)
+    # target_compile_options(${PROJECT_NAME} PRIVATE /Zc:stringStrings)
 endif()
