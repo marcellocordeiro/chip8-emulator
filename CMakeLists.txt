@@ -19,7 +19,13 @@ file(GLOB SOURCE_FILES
 #        SFML        #
 ######################
 
-find_package(SFML COMPONENTS window graphics audio REQUIRED)
+if(EXISTS ${CMAKE_HOME_DIRECTORY}/ext/SFML)
+	set(SFML_DIR ${CMAKE_HOME_DIRECTORY}/ext/SFML/lib/cmake/SFML)
+endif()
+
+# set(SFML_STATIC_LIBRARIES TRUE)
+
+find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 
 ######################
 #     Executable     #
@@ -76,4 +82,4 @@ if(UNIX)
     endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio)
+target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
