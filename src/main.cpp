@@ -1,10 +1,8 @@
 #include <filesystem>
-#include <iostream>
-#include <string>
 
-#include "common.hpp"
 #include "cpu.h"
 #include "display.h"
+#include "ini.h"
 #include "input.h"
 #include "sound.h"
 #include "timer.h"
@@ -12,51 +10,32 @@
 
 int main() {
   hide_console();
-  std::filesystem::path rom_file = select_rom();
-  chip8::cpu cpu;
-  chip8::sound sound;
   chip8::display display;
-  chip8::timer cycle_timer, timers_timer;
+  chip8::sound sound;
+  chip8::input keys;
 
-  std::cout << rom_file << std::endl;
+  chip8::cpu cpu(display, sound, keys);
+  cpu.load(select_rom());
 
-  if (rom_file.string() == "") {
-    // todo
-    std::string rom = "BRIX";
-    rom_file = std::filesystem::current_path().parent_path() / "roms" / rom;
-  }
-
-  cpu.load(rom_file.string());
+  bool running = true;
 
   try {
     while (display.is_open()) {
       switch (display.poll_events()) {
-        case actions::NONE:
+        case ac::none:
           break;
-        case actions::RESET:
-          cpu = chip8::cpu();
-          cpu.load(rom_file.string());
+        case ac::pause:
+          running = !running;
+          break;
+        case ac::reset:
+          cpu.reset();
+          cpu.load(select_rom());
           break;
       }
 
-      if (cycle_timer.elapsed_time() >= 1.0f / cte::cpu_clock) {
+      if (running) {
         cpu.cycle();
-
-        cycle_timer.restart();
-      }
-
-      if (timers_timer.elapsed_time() >= 1.0f / cte::cpu_counters_clock) {
         cpu.cycle_timers();
-        cpu.update_keys();
-        display.render(cpu.get_gfx());
-
-        if (cpu.get_beep()) {
-          sound.play();
-        } else {
-          sound.stop();
-        }
-
-        timers_timer.restart();
       }
     }
   } catch (std::exception& e) {

@@ -2,10 +2,6 @@
 
 #include <SFML/Audio/Sound.hpp>
 #include <SFML/Audio/SoundBuffer.hpp>
-#include <array>
-#include <cmath>
-
-#include "common.hpp"
 
 namespace chip8 {
 class sound {

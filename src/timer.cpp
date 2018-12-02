@@ -2,10 +2,13 @@
 
 namespace chip8 {
 float timer::elapsed_time() {
-  return _clock.getElapsedTime().asSeconds();
+  const auto end = std::chrono::high_resolution_clock::now();
+  const std::chrono::duration<float> elapsed = end - _start;
+
+  return elapsed.count();
 }
 
 void timer::restart() {
-  _clock.restart();
+  _start = std::chrono::high_resolution_clock::now();
 }
 }  // namespace chip8

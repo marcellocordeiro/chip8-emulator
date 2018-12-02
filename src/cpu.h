@@ -9,26 +9,46 @@
 #include <iostream>
 #include <sstream>
 
-#include "common.hpp"
+#include "display.h"
 #include "input.h"
 #include "random.h"
+#include "sound.h"
+#include "timer.h"
 
 #if defined(_MSC_VER) && !defined(__clang__)
 #pragma warning(disable : 4201)  // nonstandard extension used: nameless struct/union
 #pragma warning(disable : 4834)  // discarding return value of function with 'nodiscard' attribute
 #endif
 
+namespace ct {
+// cpu
+constexpr auto cpu_clock = 840.0f;
+constexpr auto cpu_counters_clock = 60.0f;
+
+// graphics
+constexpr auto screen_width = 64;
+constexpr auto screen_height = 32;
+constexpr auto char_size = 5;
+constexpr auto pixels_per_byte = 8;
+
+// array sizes
+constexpr auto memory_size = 4096;
+constexpr auto stack_size = 16;
+constexpr auto V_size = 16;
+
+// palette
+const auto background_colour = sf::Color::Black;
+const auto main_colour = sf::Color::White;
+}  // namespace ct
+
 namespace chip8 {
 class cpu {
 public:
-  cpu();
-  void load(const std::string&);
+  cpu(chip8::display&, chip8::sound&, chip8::input&);
+  void reset();
+  void load(const std::filesystem::path&);
   void cycle();
   void cycle_timers();
-  const std::array<bool, cte::gfx_size>& get_gfx() const;
-  void update_keys();
-  bool get_draw() const;
-  bool get_beep() const;
 
 private:
 #ifdef __GNUC__
@@ -61,31 +81,34 @@ private:
 #pragma clang diagnostic pop
 #endif
 
-  // gfx
-  std::array<bool, cte::gfx_size> _gfx = {};
+  // display
+  chip8::display& _display;
+
+  // sound
+  chip8::sound& _sound;
+
+  // keys
+  chip8::input& _keys;
+
+  // stopwatches
+  chip8::timer _cycle_timer;
+  chip8::timer _timers_timer;
 
   // memory
-  std::array<uint8_t, cte::memory_size> _memory = {};
+  std::array<uint8_t, ct::memory_size> _memory = {};
   uint16_t _pc = 0x200;  // program counter
 
   // stack
-  std::array<uint16_t, cte::stack_size> _stack = {};
+  std::array<uint16_t, ct::stack_size> _stack = {};
   uint8_t _sp = 0;  // stack pointer
 
-  // keys
-  chip8::input _keys = {};
-
   // misc registers
-  std::array<uint8_t, cte::V_size> _V = {};
+  std::array<uint8_t, ct::V_size> _V = {};
   uint16_t _I = 0;
 
   // timers
   uint8_t _delay_timer = 0;
   uint8_t _sound_timer = 0;
-
-  // flags
-  bool _draw = false;
-  bool _beep = false;
 
   // random
   chip8::random _rng;

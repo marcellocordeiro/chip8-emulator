@@ -1,9 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <chrono>
-
-#include "common.hpp"
 
 namespace chip8 {
 class timer {
@@ -12,6 +9,6 @@ public:
   void restart();
 
 private:
-  sf::Clock _clock;
+  std::chrono::high_resolution_clock::time_point _start = std::chrono::high_resolution_clock::now();
 };
-}
+}  // namespace chip8

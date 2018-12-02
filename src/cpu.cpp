@@ -7,7 +7,7 @@ void print_error(const std::string& error, uint16_t opcode = 0x0000) {
   throw std::runtime_error(error + ss.str());
 }
 
-cpu::cpu() {
+cpu::cpu(chip8::display& display, chip8::sound& sound, chip8::input& keys) : _display(display), _sound(sound), _keys(keys) {
   const std::array<uint8_t, 80> font_set = {
       0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
       0x20, 0x60, 0x20, 0x20, 0x70,  // 1
@@ -30,36 +30,35 @@ cpu::cpu() {
   std::copy(font_set.begin(), font_set.end(), _memory.begin());
 }
 
-void cpu::load(const std::string& rom_file) {
-  auto rom_path = std::filesystem::current_path().parent_path() / "roms" / rom_file;
-  auto rom_size = std::filesystem::file_size(rom_path);
+void cpu::reset() {
+  _display.clear();
 
-  std::ifstream rom(rom_path, std::ios::binary);
+  std::fill(_memory.begin() + 80, _memory.end(), 0);
+  _stack.fill(0);
+  _V.fill(0);
+
+  _pc = 0x200;
+  _sp = 0;
+  _I = 0;
+
+  _delay_timer = 0;
+  _sound_timer = 0;
+}
+
+void cpu::load(const std::filesystem::path& rom_file) {
+  auto rom_size = std::filesystem::file_size(rom_file);
+
+  std::ifstream rom(rom_file, std::ios::binary);
 
   rom.read(reinterpret_cast<char*>(_memory.data() + 0x200), rom_size);
 
   rom.close();
 }
 
-bool cpu::get_draw() const {
-  return _draw;
-}
-
-bool cpu::get_beep() const {
-  return _beep;
-}
-
-void cpu::update_keys() {
-  _keys.update_keys();
-}
-
-const std::array<bool, cte::gfx_size>& cpu::get_gfx() const {
-  return _gfx;
-}
-
 void cpu::cycle() {
-  _draw = false;
-  _beep = false;
+  if (!(_cycle_timer.elapsed_time() >= 1.0f / ct::cpu_clock)) {
+    return;
+  }
 
   const uint16_t raw_opcode = _memory[_pc] << 8 | _memory[_pc + 1];
   const opcode_t opcode = {raw_opcode};
@@ -119,24 +118,36 @@ void cpu::cycle() {
       print_error("[opcode not found]", opcode.raw);
       break;
   }
+
+  _cycle_timer.restart();
 }
 
 void cpu::cycle_timers() {
+  if (!(_timers_timer.elapsed_time() >= 1.0f / ct::cpu_counters_clock)) {
+    return;
+  }
+
+  _keys.update_keys();
+  _display.render();
+
   if (_delay_timer > 0) {
     --_delay_timer;
   }
 
   if (_sound_timer > 0) {
-    _beep = (_sound_timer == 1);
+    if (_sound_timer == 1) {
+      _sound.play();
+    }
 
     --_sound_timer;
   }
+
+  _timers_timer.restart();
 }
 
 // CLS - clear display [0x00E0]
 void cpu::cls() {
-  _gfx.fill(false);
-  _draw = true;
+  _display.clear();
 
   _pc += 2;
 }
@@ -304,19 +315,23 @@ void cpu::drw_Vx_Vy_nibble(opcode_t opcode) {
 
   for (uint8_t i = 0; i < height; ++i) {
     uint8_t pixel = _memory[_I + i];
-    uint8_t y = (_V[opcode.y] + i) % cte::screen_height;
+    uint8_t y = (_V[opcode.y] + i) % ct::screen_height;
 
     for (uint8_t j = 0; j < 8; ++j) {
-      uint8_t x = (_V[opcode.x] + j) % cte::screen_width;
+      uint8_t x = (_V[opcode.x] + j) % ct::screen_width;
 
       if ((pixel & (0x80 >> j)) != 0) {
-        _V[0xF] = _gfx[x + (y * cte::screen_width)];
-        _gfx[x + (y * cte::screen_width)] ^= true;
+        auto current_pixel = _display.get_pixel(x, y);
+        _V[0xF] = current_pixel == sf::Color::White;
+
+        if (current_pixel == sf::Color::White) {
+          _display.set_pixel(x, y, sf::Color::Black);
+        } else {
+          _display.set_pixel(x, y, sf::Color::White);
+        }
       }
     }
   }
-
-  _draw = true;
 
   _pc += 2;
 }
@@ -348,7 +363,7 @@ void cpu::ld_Vx_DT(opcode_t opcode) {
 
 // LD Vx, K - wait for a key press, store the value of the key in Vx [0xFx0A]
 void cpu::ld_Vx_K(opcode_t opcode) {
-  for (uint8_t i = 0; i < cte::keys_size; ++i) {
+  for (uint8_t i = 0; i < ct::keys_size; ++i) {
     if (_keys[i]) {
       _V[opcode.x] = i;
       _pc += 2;
@@ -381,7 +396,7 @@ void cpu::add_I_Vx(opcode_t opcode) {
 
 // LD F, Vx - set I = location of sprite for digit Vx [0xFx29]
 void cpu::ld_F_Vx(opcode_t opcode) {
-  _I = _V[opcode.x] * cte::char_size;
+  _I = _V[opcode.x] * ct::char_size;
 
   _pc += 2;
 }
@@ -511,4 +526,4 @@ void cpu::opcode_0xF(opcode_t opcode) {
       break;
   }
 }
-}
+}  // namespace chip8

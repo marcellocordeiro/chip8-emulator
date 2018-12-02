@@ -117,7 +117,7 @@ input::input() {
 }
 
 void input::update_keys() {
-  for (std::size_t i = 0; i < cte::keys_size; ++i) {
+  for (std::size_t i = 0; i < ct::keys_size; ++i) {
     keys[i] = sf::Keyboard::isKeyPressed(mapping[i]);
   }
 }

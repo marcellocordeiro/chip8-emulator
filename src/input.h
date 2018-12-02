@@ -4,7 +4,9 @@
 #include <array>
 #include <unordered_map>
 
-#include "common.hpp"
+namespace ct {
+constexpr auto keys_size = 16;
+}  // namespace ct
 
 namespace chip8 {
 class input {
@@ -14,7 +16,7 @@ public:
   bool operator[](std::size_t);
 
 private:
-  std::array<sf::Keyboard::Key, cte::keys_size> mapping;
-  std::array<bool, cte::keys_size> keys;
+  std::array<sf::Keyboard::Key, ct::keys_size> mapping;
+  std::array<bool, ct::keys_size> keys;
 };
 }  // namespace chip8

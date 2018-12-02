@@ -1,4 +1,5 @@
 #include "ui.h"
+#include <iostream>
 
 void message_box(const char* message) {
 #ifdef _WIN32
@@ -22,9 +23,12 @@ void show_console() {
 #endif
 }
 
-std::string select_rom() {
-  std::string buffer;
-  buffer.resize(300);
+std::filesystem::path select_rom() {
+  constexpr auto buffer_size = 300;
+  char file_path[buffer_size];
+
+  const char dialog_title[] = "Select a ROM";
+  const char initial_dir[] = "..\\roms\\";
 
 #ifdef _WIN32
   OPENFILENAMEA ofn;
@@ -36,12 +40,12 @@ std::string select_rom() {
   ofn.lpstrCustomFilter = NULL;
   ofn.nMaxCustFilter = 0;
   ofn.nFilterIndex = 0;
-  ofn.lpstrFile = buffer.data();
-  ofn.nMaxFile = 300;
+  ofn.lpstrFile = file_path;
+  ofn.nMaxFile = buffer_size;
   ofn.lpstrFileTitle = NULL;
   ofn.nMaxFileTitle = 0;
-  ofn.lpstrInitialDir = "..\\roms\\";
-  ofn.lpstrTitle = NULL;
+  ofn.lpstrInitialDir = initial_dir;
+  ofn.lpstrTitle = dialog_title;
   ofn.Flags = OFN_EXPLORER;
   ofn.nFileOffset = 0;
   ofn.nFileExtension = 0;
@@ -59,11 +63,11 @@ std::string select_rom() {
   ofn.FlagsEx = 0;
 #endif
   if (!GetOpenFileNameA(&ofn)) {
-    buffer = "";
+    return std::filesystem::current_path().parent_path() / "roms" / "BRIX";
   }
 #else
-  buffer = "";
+  return std::filesystem::current_path().parent_path() / "roms" / "BRIX";
 #endif
 
-  return buffer;
+  return std::filesystem::canonical(std::filesystem::path(file_path));
 }

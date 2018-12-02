@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <filesystem>
 #include <string>
 
 #ifdef _WIN32
@@ -10,4 +10,4 @@
 void hide_console();
 void show_console();
 void message_box(const char* message);
-std::string select_rom();
+std::filesystem::path select_rom();
