@@ -9,7 +9,7 @@
 #include "ui.h"
 
 int main() {
-  hide_console();
+  chip8::hide_console();
 
   chip8::display display;
   chip8::sound sound;
@@ -18,7 +18,7 @@ int main() {
   chip8::cpu cpu(display, sound, keys);
 
   try {
-    cpu.load(select_rom());
+    cpu.load(chip8::select_rom());
     bool running = true;
 
     while (display.is_open()) {
@@ -30,7 +30,7 @@ int main() {
           break;
         case ac::reset:
           cpu.reset();
-          cpu.load(select_rom());
+          cpu.load(chip8::select_rom());
           break;
       }
 
@@ -41,7 +41,7 @@ int main() {
     }
   } catch (std::exception& e) {
     display.close();
-    message_box(e.what());
+    chip8::message_box(e.what());
   }
 
   return 0;
