@@ -35,8 +35,7 @@ public:
 
 private:
   sf::RenderWindow _window;
-  // std::array<sf::Color, ct::gfx_size> _gfx;
-  std::array<std::array<sf::Color, ct::gfx_height>, ct::gfx_width> _gfx;
+  std::array<std::array<sf::Color, ct::gfx_height>, ct::gfx_width> _gfx = {{}};
 };
 }  // namespace chip8
 

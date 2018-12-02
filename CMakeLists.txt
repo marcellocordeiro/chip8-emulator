@@ -18,7 +18,6 @@ file(GLOB SOURCE_FILES
 ######################
 #        SFML        #
 ######################
-
 find_package(Git REQUIRED)
 
 include(ExternalProject)
@@ -58,12 +57,12 @@ set_target_properties(
                CXX_EXTENSIONS NO
 )
 
-if(
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+if(UNIX)
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic)
+        target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+    endif()
 endif()
 
 if(MSVC)
@@ -83,16 +82,17 @@ endif()
 # Link libraries #
 ##################
 
-if(UNIX AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined,address)
-    target_link_libraries(${PROJECT_NAME} asan ubsan)
-endif()
+if(UNIX)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=undefined,address)
+        target_link_libraries(${PROJECT_NAME} asan ubsan)
+    endif()
 
-if(
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
-    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-)
-    target_link_libraries(${PROJECT_NAME} stdc++fs)
+
+    if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+       "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        target_link_libraries(${PROJECT_NAME} stdc++fs)
+    endif()
 endif()
 
 target_link_libraries(${PROJECT_NAME} sfml-window sfml-graphics sfml-audio sfml-system)

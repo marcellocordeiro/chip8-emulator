@@ -14,4 +14,4 @@ private:
   sf::SoundBuffer _buffer;
   sf::Sound _sound;
 };
-}
+}  // namespace chip8

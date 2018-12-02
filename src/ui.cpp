@@ -1,5 +1,4 @@
 #include "ui.h"
-#include <iostream>
 
 void message_box(const char* message) {
 #ifdef _WIN32
@@ -7,7 +6,7 @@ void message_box(const char* message) {
 #endif
 
 #ifdef __linux__
-  std::cout << message << std::endl;
+  // todo
 #endif
 }
 
@@ -32,38 +31,23 @@ std::filesystem::path select_rom() {
 
 #ifdef _WIN32
   OPENFILENAMEA ofn;
+  ZeroMemory(&ofn, sizeof(ofn));
 
-  ofn.lStructSize = sizeof(OPENFILENAMEA);
-  ofn.hwndOwner = NULL;
-  ofn.hInstance = NULL;
-  ofn.lpstrFilter = NULL;
-  ofn.lpstrCustomFilter = NULL;
-  ofn.nMaxCustFilter = 0;
-  ofn.nFilterIndex = 0;
+  ofn.lStructSize = sizeof(ofn);
+  ofn.hwndOwner = nullptr;
   ofn.lpstrFile = file_path;
-  ofn.nMaxFile = buffer_size;
-  ofn.lpstrFileTitle = NULL;
+  ofn.lpstrFile[0] = '\0';
+  ofn.nMaxFile = sizeof(file_path);
+  ofn.lpstrFilter = "All\0*.*\0";
+  ofn.nFilterIndex = 1;
+  ofn.lpstrFileTitle = nullptr;
   ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = initial_dir;
   ofn.lpstrTitle = dialog_title;
-  ofn.Flags = OFN_EXPLORER;
-  ofn.nFileOffset = 0;
-  ofn.nFileExtension = 0;
-  ofn.lpstrDefExt = NULL;
-  ofn.lCustData = NULL;
-  ofn.lpfnHook = NULL;
-  ofn.lpTemplateName = NULL;
-#ifdef _MAC
-  ofn.lpEditInfo = NULL;
-  ofn.lpstrPrompt = NULL;
-#endif
-#if (_WIN32_WINNT >= 0x0500)
-  ofn.pvReserved = 0;
-  ofn.dwReserved = 0;
-  ofn.FlagsEx = 0;
-#endif
+  ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
   if (!GetOpenFileNameA(&ofn)) {
-    return std::filesystem::current_path().parent_path() / "roms" / "BRIX";
+    throw std::runtime_error("Can't select a ROM");
   }
 #else
   return std::filesystem::current_path().parent_path() / "roms" / "BRIX";

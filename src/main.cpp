@@ -10,16 +10,17 @@
 
 int main() {
   hide_console();
+
   chip8::display display;
   chip8::sound sound;
   chip8::input keys;
 
   chip8::cpu cpu(display, sound, keys);
-  cpu.load(select_rom());
-
-  bool running = true;
 
   try {
+    cpu.load(select_rom());
+    bool running = true;
+
     while (display.is_open()) {
       switch (display.poll_events()) {
         case ac::none:

@@ -3,14 +3,10 @@
 #include <cstdint>
 #include <random>
 
-/* #include <array>
-#include <algorithm>
-#include <functional> */
-
 namespace chip8 {
 class random {
 public:
-  /* static  */ uint8_t gen();
+  uint8_t gen();
 
 private:
   static inline std::random_device rd{};

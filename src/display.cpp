@@ -38,9 +38,11 @@ ac display::poll_events() {
 }
 
 void display::clear() {
-  for (auto& el : _gfx) {
-    el.fill(sf::Color::Black);
-  }
+  /* std::for_each(_gfx.begin(), _gfx.end(),
+    [](auto&& arr) { arr.fill(sf::Color::Black); }
+  ); */ // for documentation purposes
+
+  _gfx.fill({});
 
   render();
 }
@@ -68,63 +70,3 @@ void display::render() {
   _window.display();
 }
 }  // namespace chip8
-
-/* display::display() {
-  SDL_Init(SDL_INIT_VIDEO);
-
-  _window = SDL_CreateWindow("chip8-emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, ct::screen_width * ct::res_scale, ct::screen_height * ct::res_scale, SDL_WINDOW_SHOWN);
-  _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-}
-
-display::~display() {
-  // SDL_DestroyRenderer(_renderer);
-  // SDL_DestroyWindow(_window);
-  // SDL_Quit();
-}
-
-void display::poll_events() {
-  SDL_Event event;
-
-  while (SDL_PollEvent(&event)) {
-    if (event.type == SDL_QUIT) {
-      close();
-    }
-  }
-}
-
-bool display::is_open() {
-  return (_renderer != nullptr);
-}
-
-void display::close() {
-  SDL_Quit();
-
-  _window = nullptr;
-  _renderer = nullptr;
-}
-
-void display::render(const std::array<bool, ct::gfx_size>& gfx) {
-  SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 0);
-  SDL_RenderClear(_renderer);
-  SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
-
-  SDL_Rect rect;
-
-  rect.x = 0;
-  rect.y = 0;
-  rect.h = ct::res_scale;
-  rect.w = ct::res_scale;
-
-  for (int y = 0; y < ct::screen_height; ++y) {
-    for (int x = 0; x < ct::screen_width; ++x) {
-      rect.x = x * ct::res_scale;
-      rect.y = y * ct::res_scale;
-
-      if (gfx[x + (y * ct::screen_width)]) {
-        SDL_RenderFillRect(_renderer, &rect);
-      }
-    }
-  }
-
-  SDL_RenderPresent(_renderer);
-} */

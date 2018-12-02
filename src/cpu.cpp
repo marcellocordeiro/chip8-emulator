@@ -50,6 +50,10 @@ void cpu::load(const std::filesystem::path& rom_file) {
 
   std::ifstream rom(rom_file, std::ios::binary);
 
+  if (!rom) {
+    throw std::runtime_error("Can't open the ROM");
+  }
+
   rom.read(reinterpret_cast<char*>(_memory.data() + 0x200), rom_size);
 
   rom.close();
