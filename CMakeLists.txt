@@ -31,9 +31,9 @@ find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 #        SDL2        #
 ######################
 
-# if(EXISTS ${CMAKE_HOME_DIRECTORY}/ext/SDL2)
-# 	set(SDL2_DIR ${CMAKE_HOME_DIRECTORY}/ext/SFML/lib/cmake/SFML)
-# endif()
+if(EXISTS ${CMAKE_HOME_DIRECTORY}/ext/SDL2)
+	set(SDL2_DIR ${CMAKE_HOME_DIRECTORY}/ext/SDL2/cmake)
+endif()
 
 find_package(SDL2 REQUIRED)
 
