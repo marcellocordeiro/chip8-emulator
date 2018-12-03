@@ -37,8 +37,8 @@ constexpr auto stack_size = 16;
 constexpr auto V_size = 16;
 
 // palette
-const auto background_colour = sf::Color::Black;
-const auto main_colour = sf::Color::White;
+const SDL_Color background_colour = {0, 0, 0, 0};
+const SDL_Color main_colour = {255, 255, 255, 255};
 }  // namespace ct
 
 namespace chip8 {

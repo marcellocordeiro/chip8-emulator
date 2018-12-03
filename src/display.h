@@ -1,7 +1,8 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include <SDL2/SDL.h>
 #include <array>
+#include <memory>
 
 namespace ct {
 // array sizes
@@ -19,6 +20,25 @@ constexpr auto res_height = gfx_height * res_scale;
 
 enum class ac { none, pause, reset };
 
+namespace SDL2 {
+struct Deleter {
+  void operator()(SDL_Renderer* ptr) {
+    if (ptr) {
+      SDL_DestroyRenderer(ptr);
+    }
+  }
+
+  void operator()(SDL_Window* ptr) {
+    if (ptr) {
+      SDL_DestroyWindow(ptr);
+    }
+  }
+};
+
+using Renderer = std::unique_ptr<SDL_Renderer, Deleter>;
+using Window = std::unique_ptr<SDL_Window, Deleter>;
+}  // namespace SDL2
+
 namespace chip8 {
 class display {
 public:
@@ -30,12 +50,13 @@ public:
   ac poll_events();
   void render();
 
-  const sf::Color& get_pixel(std::size_t, std::size_t) const;
-  void set_pixel(std::size_t, std::size_t, const sf::Color&);
+  const SDL_Color& get_pixel(std::size_t, std::size_t) const;
+  void set_pixel(std::size_t, std::size_t, const SDL_Color&);
 
 private:
-  sf::RenderWindow _window;
-  std::array<std::array<sf::Color, ct::gfx_height>, ct::gfx_width> _gfx = {{}};
+  SDL2::Window _window;
+  SDL2::Renderer _renderer;
+  std::array<std::array<SDL_Color, ct::gfx_height>, ct::gfx_width> _gfx = {{}};
 };
 }  // namespace chip8
 

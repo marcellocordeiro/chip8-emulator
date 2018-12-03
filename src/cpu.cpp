@@ -326,12 +326,12 @@ void cpu::drw_Vx_Vy_nibble(opcode_t opcode) {
 
       if ((pixel & (0x80 >> j)) != 0) {
         auto current_pixel = _display.get_pixel(x, y);
-        _V[0xF] = current_pixel == sf::Color::White;
+        _V[0xF] = current_pixel.r == ct::main_colour.r;
 
-        if (current_pixel == sf::Color::White) {
-          _display.set_pixel(x, y, sf::Color::Black);
+        if (current_pixel.r == ct::main_colour.r) {
+          _display.set_pixel(x, y, ct::background_colour);
         } else {
-          _display.set_pixel(x, y, sf::Color::White);
+          _display.set_pixel(x, y, ct::main_colour);
         }
       }
     }

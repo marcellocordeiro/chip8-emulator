@@ -28,6 +28,16 @@ endif()
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 
 ######################
+#        SDL2        #
+######################
+
+# if(EXISTS ${CMAKE_HOME_DIRECTORY}/ext/SDL2)
+# 	set(SDL2_DIR ${CMAKE_HOME_DIRECTORY}/ext/SFML/lib/cmake/SFML)
+# endif()
+
+find_package(SDL2 REQUIRED)
+
+######################
 #     Executable     #
 ######################
 
@@ -83,3 +93,4 @@ if(UNIX)
 endif()
 
 target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES})

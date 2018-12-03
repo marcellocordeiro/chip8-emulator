@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include <filesystem>
 
 #include "cpu.h"
@@ -10,6 +11,8 @@
 
 int main() {
   chip8::hide_console();
+  
+  SDL_Init(SDL_INIT_VIDEO);
 
   chip8::display display;
   chip8::sound sound;
@@ -43,6 +46,8 @@ int main() {
     display.close();
     chip8::message_box(e.what());
   }
+
+  SDL_Quit();
 
   return 0;
 }
