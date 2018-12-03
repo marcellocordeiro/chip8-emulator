@@ -1,4 +1,5 @@
 **/.vscode/
 **/build/
 **/SFML/
+**/SDL2/
 **/bin/
