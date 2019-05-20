@@ -13,10 +13,10 @@ class input {
 public:
   input();
   void update_keys();
-  bool operator[](std::size_t);
+  bool operator[](const std::size_t) const;
 
 private:
   std::array<sf::Keyboard::Key, ct::keys_size> mapping;
-  std::array<bool, ct::keys_size> keys;
+  std::array<bool, ct::keys_size>              keys;
 };
 }  // namespace chip8

@@ -2,71 +2,71 @@
 
 namespace chip8 {
 display::display() {
-  _window.create(sf::VideoMode(ct::res_width, ct::res_height), "chip8-emulator");
-  _window.setFramerateLimit(ct::fps_limit);
-  _window.clear();
-  _window.display();
+  this->window.create(sf::VideoMode(ct::res_width, ct::res_height), "chip8-emulator");
+  this->window.setFramerateLimit(ct::fps_limit);
+  this->window.clear();
+  this->window.display();
 }
 
 bool display::is_open() {
-  return _window.isOpen();
+  return this->window.isOpen();
 }
 
 void display::close() {
-  _window.close();
+  this->window.close();
 }
 
-ac display::poll_events() {
-  auto action = ac::none;
+std::queue<action_type>& display::poll_events() {
   sf::Event event;
 
-  while (_window.pollEvent(event)) {
+  while (this->window.pollEvent(event)) {
     if (event.type == sf::Event::Closed) {
-      _window.close();
+      this->window.close();
     }
 
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-      action = ac::pause;
+      actions.push(action_type::pause);
     }
 
     if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1) {
-      action = ac::reset;
+      actions.push(action_type::reset);
     }
   }
 
-  return action;
+  return actions;
 }
 
 void display::clear() {
-  /* std::for_each(_gfx.begin(), _gfx.end(),
+  /* std::for_each(this->gfx.begin(), this->gfx.end(),
     [](auto&& arr) { arr.fill(sf::Color::Black); }
   ); */ // for documentation purposes
 
-  _gfx.fill({});
+  this->gfx.fill({});
 
   render();
 }
 
-const sf::Color& display::get_pixel(std::size_t x, std::size_t y) const {
-  return _gfx[x][y];
+std::uint32_t display::get_pixel(const std::size_t x, const std::size_t y) const {
+  return this->gfx[x][y].toInteger();
 }
 
-void display::set_pixel(std::size_t x, std::size_t y, const sf::Color& color) {
-  _gfx[x][y] = color;
+void display::set_pixel(const std::size_t x, const std::size_t y, const std::uint32_t color) {
+  this->gfx[x][y] = sf::Color(color);
 }
 
 void display::render() {
-  sf::RectangleShape rect(sf::Vector2f(ct::scale, ct::scale));
-  _window.clear();
+  this->window.clear();
 
   for (std::size_t y = 0; y < ct::gfx_height; ++y) {
     for (std::size_t x = 0; x < ct::gfx_width; ++x) {
-      rect.setFillColor(_gfx[x][y]);
+      sf::RectangleShape rect(sf::Vector2f(ct::scale, ct::scale));
+      rect.setFillColor(this->gfx[x][y]);
       rect.setPosition(x * ct::scale, y * ct::scale);
-      _window.draw(rect);
+
+      this->window.draw(rect);
     }
   }
 
-  _window.display();
+  this->window.display();
 }
 }  // namespace chip8

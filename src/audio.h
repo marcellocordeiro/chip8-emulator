@@ -4,14 +4,14 @@
 #include <SFML/Audio/SoundBuffer.hpp>
 
 namespace chip8 {
-class sound {
+class audio {
 public:
-  sound();
+  audio();
   void play();
   void stop();
 
 private:
-  sf::SoundBuffer _buffer;
-  sf::Sound _sound;
+  sf::SoundBuffer buffer;
+  sf::Sound       sound;
 };
 }  // namespace chip8

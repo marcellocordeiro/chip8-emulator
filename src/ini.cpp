@@ -6,7 +6,7 @@ void trim_string(std::string& str) {
 
 ini::ini(const std::string& file_name) {
   std::ifstream file(file_name);
-  std::string name, value;
+  std::string   name, value;
 
   while (std::getline(file, name, '=')) {
     std::getline(file, value);

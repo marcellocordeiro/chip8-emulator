@@ -28,27 +28,27 @@ void show_console() {
 
 std::filesystem::path select_rom() {
   constexpr auto buffer_size = 300;
-  char file_path[buffer_size];
+  char           file_path[buffer_size];
 
 #ifdef _WIN32
   const char dialog_title[] = "Select a ROM";
-  const char initial_dir[] = "..\\roms\\";
+  const char initial_dir[]  = "..\\roms\\";
 
   OPENFILENAMEA ofn;
   ZeroMemory(&ofn, sizeof(ofn));
 
-  ofn.lStructSize = sizeof(ofn);
-  ofn.hwndOwner = nullptr;
-  ofn.lpstrFile = file_path;
-  ofn.lpstrFile[0] = '\0';
-  ofn.nMaxFile = sizeof(file_path);
-  ofn.lpstrFilter = "All\0*.*\0";
-  ofn.nFilterIndex = 1;
-  ofn.lpstrFileTitle = nullptr;
-  ofn.nMaxFileTitle = 0;
+  ofn.lStructSize     = sizeof(ofn);
+  ofn.hwndOwner       = nullptr;
+  ofn.lpstrFile       = file_path;
+  ofn.lpstrFile[0]    = '\0';
+  ofn.nMaxFile        = sizeof(file_path);
+  ofn.lpstrFilter     = "All\0*.*\0";
+  ofn.nFilterIndex    = 1;
+  ofn.lpstrFileTitle  = nullptr;
+  ofn.nMaxFileTitle   = 0;
   ofn.lpstrInitialDir = initial_dir;
-  ofn.lpstrTitle = dialog_title;
-  ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+  ofn.lpstrTitle      = dialog_title;
+  ofn.Flags           = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
   if (!GetOpenFileNameA(&ofn)) {
     throw std::runtime_error("Couldn't select a ROM");
