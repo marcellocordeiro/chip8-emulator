@@ -27,7 +27,7 @@ cpu::cpu(chip8::display& display, chip8::audio& sound, chip8::input& keys) : dis
 void cpu::reset() {
   this->display.clear();
 
-  std::fill(this->memory.begin() + 80, this->memory.end(), 0);
+  std::fill(this->memory.begin() + 80, this->memory.end(), static_cast<std::uint8_t>(0));
   this->stack = {};
   this->V     = {};
 
