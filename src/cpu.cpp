@@ -42,14 +42,13 @@ void cpu::reset() {
 void cpu::load(const std::filesystem::path& rom_file) {
   auto rom_size = std::filesystem::file_size(rom_file);
 
-  using romstream = std::basic_ifstream<std::uint8_t, std::char_traits<std::uint8_t>>;
-  romstream rom(rom_file, std::ios::binary);
+  std::ifstream rom(rom_file, std::ios::binary);
 
   if (!rom) {
     throw std::runtime_error("Can't open the ROM");
   }
 
-  rom.read(this->memory.data() + 0x200, rom_size);
+  rom.read(reinterpret_cast<char*>(this->memory.data()) + 0x200, rom_size);
 
   rom.close();
 }
