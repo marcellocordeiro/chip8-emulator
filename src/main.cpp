@@ -9,7 +9,8 @@
 #include "timer.h"
 #include "ui.h"
 
-int main() {
+int main()
+{
   chip8::hide_console();
 
   chip8::display display;

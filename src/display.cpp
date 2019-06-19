@@ -1,22 +1,27 @@
 #include "display.h"
 
 namespace chip8 {
-display::display() {
-  this->window.create(sf::VideoMode(ct::res_width, ct::res_height), "chip8-emulator");
+display::display()
+{
+  this->window.create(
+      sf::VideoMode(ct::res_width, ct::res_height), "chip8-emulator");
   this->window.setFramerateLimit(ct::fps_limit);
   this->window.clear();
   this->window.display();
 }
 
-bool display::is_open() {
+bool display::is_open()
+{
   return this->window.isOpen();
 }
 
-void display::close() {
+void display::close()
+{
   this->window.close();
 }
 
-std::queue<action_type>& display::poll_events() {
+std::queue<action_type>& display::poll_events()
+{
   sf::Event event;
 
   while (this->window.pollEvent(event)) {
@@ -24,11 +29,13 @@ std::queue<action_type>& display::poll_events() {
       this->window.close();
     }
 
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+    if (event.type == sf::Event::KeyPressed &&
+        event.key.code == sf::Keyboard::Escape) {
       actions.push(action_type::pause);
     }
 
-    if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F1) {
+    if (event.type == sf::Event::KeyPressed &&
+        event.key.code == sf::Keyboard::F1) {
       actions.push(action_type::reset);
     }
   }
@@ -36,7 +43,8 @@ std::queue<action_type>& display::poll_events() {
   return actions;
 }
 
-void display::clear() {
+void display::clear()
+{
   /* std::for_each(this->gfx.begin(), this->gfx.end(),
     [](auto&& arr) { arr.fill(sf::Color::Black); }
   ); */ // for documentation purposes
@@ -46,15 +54,19 @@ void display::clear() {
   render();
 }
 
-std::uint32_t display::get_pixel(const std::size_t x, const std::size_t y) const {
+std::uint32_t display::get_pixel(const std::size_t x, const std::size_t y) const
+{
   return this->gfx[x][y].toInteger();
 }
 
-void display::set_pixel(const std::size_t x, const std::size_t y, const std::uint32_t color) {
+void display::set_pixel(
+    const std::size_t x, const std::size_t y, const std::uint32_t color)
+{
   this->gfx[x][y] = sf::Color(color);
 }
 
-void display::render() {
+void display::render()
+{
   this->window.clear();
 
   for (std::size_t y = 0; y < ct::gfx_height; ++y) {

@@ -13,8 +13,10 @@
 #include "timer.h"
 
 #if defined(_MSC_VER) && !defined(__clang__)
-#pragma warning(disable : 4201)  // nonstandard extension used: nameless struct/union
-#pragma warning(disable : 4834)  // discarding return value of function with 'nodiscard' attribute
+// nonstandard extension used: nameless struct/union
+#pragma warning(disable : 4201)
+// discarding return value of function with 'nodiscard' attribute
+#pragma warning(disable : 4834)
 #endif
 
 namespace ct {
@@ -55,7 +57,8 @@ private:
     uint16_t nnn : 12;
     uint8_t  kk : 8;
 
-    opcode_t(const uint16_t raw) {
+    opcode_t(const uint16_t raw)
+    {
       main = (raw & 0xF000) >> 12;
       x    = (raw & 0x0F00) >> 8;
       y    = (raw & 0x00F0) >> 4;

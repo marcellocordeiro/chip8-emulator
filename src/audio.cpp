@@ -1,7 +1,8 @@
 #include "audio.h"
 
 namespace chip8 {
-audio::audio() {
+audio::audio()
+{
   this->buffer.loadFromFile("../audio/beep.wav");
   this->sound.setBuffer(this->buffer);
 
@@ -9,11 +10,13 @@ audio::audio() {
   this->sound.setLoop(false);
 }
 
-void audio::play() {
+void audio::play()
+{
   this->sound.play();
 }
 
-void audio::stop() {
+void audio::stop()
+{
   this->sound.stop();
 }
 }  // namespace chip8

@@ -1,7 +1,8 @@
 #include "input.h"
 
 namespace chip8 {
-input::input() {
+input::input()
+{
   // clang-format off
   const std::unordered_map<std::string, sf::Keyboard::Key> key_bindings = {
     {"Unknown",   sf::Keyboard::Key::Unknown},
@@ -116,13 +117,15 @@ input::input() {
   // clang-format on
 }
 
-void input::update_keys() {
+void input::update_keys()
+{
   for (auto i = 0; i < ct::keys_size; ++i) {
     this->keys[i] = sf::Keyboard::isKeyPressed(this->mapping[i]);
   }
 }
 
-bool input::operator[](const std::size_t i) const {
+bool input::operator[](const std::size_t i) const
+{
   return this->keys[i];
 }
 }  // namespace chip8

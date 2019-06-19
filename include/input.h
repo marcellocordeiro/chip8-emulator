@@ -1,8 +1,9 @@
 #pragma once
 
-#include <SFML/Window/Keyboard.hpp>
 #include <array>
 #include <unordered_map>
+
+#include <SFML/Window/Keyboard.hpp>
 
 namespace ct {
 constexpr auto keys_size = 16;

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <array>
 #include <queue>
+
+#include <SFML/Graphics.hpp>
 
 namespace ct {
 // array sizes
@@ -31,7 +32,7 @@ public:
   std::queue<action_type>& poll_events();
 
   std::uint32_t get_pixel(const std::size_t, const std::size_t) const;
-  void          set_pixel(const std::size_t, const std::size_t, const std::uint32_t);
+  void set_pixel(const std::size_t, const std::size_t, const std::uint32_t);
 
   void render();
 

@@ -1,7 +1,8 @@
 #include "ui.h"
 
 namespace chip8 {
-void message_box(const char* message) {
+void message_box(const char* message)
+{
 #ifdef _WIN32
   MessageBox(NULL, message, "Error!", MB_OK);
 #endif
@@ -14,19 +15,22 @@ void message_box(const char* message) {
 #endif
 }
 
-void hide_console() {
+void hide_console()
+{
 #ifdef _WIN32
   ShowWindow(GetConsoleWindow(), SW_HIDE);
 #endif
 }
 
-void show_console() {
+void show_console()
+{
 #ifdef _WIN32
   ShowWindow(GetConsoleWindow(), SW_SHOW);
 #endif
 }
 
-std::filesystem::path select_rom() {
+std::filesystem::path select_rom()
+{
   constexpr auto buffer_size = 300;
   char           file_path[buffer_size];
 
@@ -58,7 +62,8 @@ std::filesystem::path select_rom() {
 #endif
 
 #ifdef __linux__
-  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen("zenity --file-selection", "r"), pclose);
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(
+      popen("zenity --file-selection", "r"), pclose);
 
   if (!pipe) {
     throw std::runtime_error("popen() failed");
