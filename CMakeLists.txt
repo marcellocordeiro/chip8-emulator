@@ -47,17 +47,12 @@ set(MSVC_FLAGS
     /permissive-
     /diagnostics:caret
     /Zi
-    /wd4805
-    /wd4267
-    /wd4100
-    /wd4201
 )
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:${MSVC_FLAGS}>
-    #$<$<BOOL:MSVC>:${MSVC_FLAGS}>
     $<$<CXX_COMPILER_ID:GNU>:${GNU_FLAGS}>
 )
 
