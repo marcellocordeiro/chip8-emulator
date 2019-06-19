@@ -11,13 +11,7 @@
 #include "input.h"
 #include "random.h"
 #include "timer.h"
-
-#if defined(_MSC_VER) && !defined(__clang__)
-// nonstandard extension used: nameless struct/union
-#pragma warning(disable : 4201)
-// discarding return value of function with 'nodiscard' attribute
-#pragma warning(disable : 4834)
-#endif
+#include "types.h"
 
 namespace ct {
 // cpu
@@ -43,7 +37,12 @@ constexpr auto main_colour       = 0xFFFFFFFF;
 namespace chip8 {
 class cpu {
 public:
-  cpu(chip8::display&, chip8::audio&, chip8::input&);
+  cpu();
+  
+  void set_component(chip8::display&);
+  void set_component(chip8::audio&);
+  void set_component(chip8::input&);
+
   void reset();
   void load(const std::filesystem::path&);
   void cycle();
@@ -68,9 +67,9 @@ private:
     }
   };
 
-  chip8::display& display;
-  chip8::audio&   sound;
-  chip8::input&   keys;
+  chip8::display* display = nullptr;
+  chip8::audio*   sound   = nullptr;
+  chip8::input*   keys    = nullptr;
   chip8::timer    cycle_timer;
   chip8::timer    timers_timer;
   chip8::random   rng;

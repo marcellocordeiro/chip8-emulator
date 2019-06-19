@@ -1,22 +1,23 @@
 #include <filesystem>
 
-#include <iostream>
 #include "audio.h"
 #include "cpu.h"
 #include "display.h"
-#include "ini.h"
 #include "input.h"
-#include "timer.h"
 #include "ui.h"
 
 int main()
 {
   chip8::hide_console();
 
+  chip8::cpu     cpu;
   chip8::display display;
   chip8::audio   sound;
   chip8::input   keys;
-  chip8::cpu     cpu(display, sound, keys);
+
+  cpu.set_component(display);
+  cpu.set_component(sound);
+  cpu.set_component(keys);
 
   try {
     cpu.load(chip8::select_rom());

@@ -5,6 +5,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "types.h"
+
 namespace ct {
 // array sizes
 constexpr auto gfx_width  = 64;
@@ -31,8 +33,8 @@ public:
 
   std::queue<action_type>& poll_events();
 
-  std::uint32_t get_pixel(const std::size_t, const std::size_t) const;
-  void set_pixel(const std::size_t, const std::size_t, const std::uint32_t);
+  uint32_t get_pixel(const size_t, const size_t) const;
+  void     set_pixel(const size_t, const size_t, const uint32_t);
 
   void render();
 

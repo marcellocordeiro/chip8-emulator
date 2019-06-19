@@ -1,11 +1,9 @@
 #include "cpu.h"
 
 namespace chip8 {
-cpu::cpu(
-    chip8::display& display_in, chip8::audio& sound_in, chip8::input& keys_in)
-  : display(display_in), sound(sound_in), keys(keys_in)
+cpu::cpu()
 {
-  constexpr std::array<std::uint8_t, 80> font_set = {
+  constexpr std::array<uint8_t, 80> font_set = {
       0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
       0x20, 0x60, 0x20, 0x20, 0x70,  // 1
       0xF0, 0x10, 0xF0, 0x80, 0xF0,  // 2
@@ -27,14 +25,27 @@ cpu::cpu(
   std::copy(font_set.begin(), font_set.end(), this->memory.begin());
 }
 
+void cpu::set_component(chip8::display& ref)
+{
+  this->display = &ref;
+}
+
+void cpu::set_component(chip8::audio& ref)
+{
+  this->sound = &ref;
+}
+
+void cpu::set_component(chip8::input& ref)
+{
+  this->keys = &ref;
+}
+
 void cpu::reset()
 {
-  this->display.clear();
+  this->display->clear();
 
   std::fill(
-      this->memory.begin() + 80,
-      this->memory.end(),
-      static_cast<std::uint8_t>(0));
+      this->memory.begin() + 80, this->memory.end(), static_cast<uint8_t>(0));
   this->stack = {};
   this->V     = {};
 
@@ -69,8 +80,8 @@ void cpu::cycle()
   }
 
   if (this->timers_timer.elapsed_time() >= 1.0f / ct::cpu_counters_clock) {
-    this->keys.update_keys();
-    this->display.render();
+    this->keys->update_keys();
+    this->display->render();
 
     if (this->delay_timer > 0) {
       --this->delay_timer;
@@ -78,7 +89,7 @@ void cpu::cycle()
 
     if (this->sound_timer > 0) {
       if (this->sound_timer == 1) {
-        this->sound.play();
+        this->sound->play();
       }
 
       --this->sound_timer;
@@ -167,7 +178,7 @@ void cpu::opcode_0xF(const opcode_t& opcode)
 // CLS - clear display [0x00E0]
 void cpu::cls()
 {
-  this->display.clear();
+  this->display->clear();
 
   this->pc += 2;
 }
@@ -354,23 +365,23 @@ void cpu::rnd_Vx_byte(const opcode_t& opcode)
 // (Vx, Vy), set VF = collision. [0xDxyn]
 void cpu::drw_Vx_Vy_nibble(const opcode_t& opcode)
 {
-  std::uint8_t height = opcode.n;
+  uint8_t height = opcode.n;
 
-  for (std::uint8_t i = 0; i < height; ++i) {
-    std::uint8_t pixel = this->memory[this->I + i];
-    std::uint8_t y     = (this->V[opcode.y] + i) % ct::screen_height;
+  for (uint8_t i = 0; i < height; ++i) {
+    uint8_t pixel = this->memory[this->I + i];
+    uint8_t y     = (this->V[opcode.y] + i) % ct::screen_height;
 
-    for (std::uint8_t j = 0; j < 8; ++j) {
-      std::uint8_t x = (this->V[opcode.x] + j) % ct::screen_width;
+    for (uint8_t j = 0; j < 8; ++j) {
+      uint8_t x = (this->V[opcode.x] + j) % ct::screen_width;
 
       if ((pixel & (0x80 >> j)) != 0) {
-        auto current_pixel = this->display.get_pixel(x, y);
+        auto current_pixel = this->display->get_pixel(x, y);
         this->V[0xF]       = (current_pixel == ct::main_colour);
 
         if (current_pixel == ct::main_colour) {
-          this->display.set_pixel(x, y, ct::background_colour);
+          this->display->set_pixel(x, y, ct::background_colour);
         } else {
-          this->display.set_pixel(x, y, ct::main_colour);
+          this->display->set_pixel(x, y, ct::main_colour);
         }
       }
     }
@@ -383,7 +394,7 @@ void cpu::drw_Vx_Vy_nibble(const opcode_t& opcode)
 // with the value of Vx is pressed [0xEx9E]
 void cpu::skp_Vx(const opcode_t& opcode)
 {
-  if (this->keys[this->V[opcode.x]]) {
+  if ((*this->keys)[this->V[opcode.x]]) {
     this->pc += 2;
   }
 
@@ -395,7 +406,7 @@ void cpu::skp_Vx(const opcode_t& opcode)
 // [0xExA1]
 void cpu::sknp_Vx(const opcode_t& opcode)
 {
-  if (!this->keys[this->V[opcode.x]]) {
+  if (!(*this->keys)[this->V[opcode.x]]) {
     this->pc += 2;
   }
 
@@ -413,8 +424,8 @@ void cpu::ld_Vx_DT(const opcode_t& opcode)
 // LD Vx, K - wait for a key press, store the value of the key in Vx [0xFx0A]
 void cpu::ld_Vx_K(const opcode_t& opcode)
 {
-  for (std::uint8_t i = 0; i < ct::keys_size; ++i) {
-    if (this->keys[i]) {
+  for (uint8_t i = 0; i < ct::keys_size; ++i) {
+    if ((*this->keys)[i]) {
       this->V[opcode.x] = i;
       this->pc += 2;
       return;

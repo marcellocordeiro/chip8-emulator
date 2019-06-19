@@ -5,6 +5,8 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
+#include "types.h"
+
 namespace ct {
 constexpr auto keys_size = 16;
 }  // namespace ct
@@ -14,7 +16,7 @@ class input {
 public:
   input();
   void update_keys();
-  bool operator[](const std::size_t) const;
+  bool operator[](const size_t) const;
 
 private:
   std::array<sf::Keyboard::Key, ct::keys_size> mapping;

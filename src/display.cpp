@@ -54,13 +54,13 @@ void display::clear()
   render();
 }
 
-std::uint32_t display::get_pixel(const std::size_t x, const std::size_t y) const
+std::uint32_t display::get_pixel(const size_t x, const size_t y) const
 {
   return this->gfx[x][y].toInteger();
 }
 
 void display::set_pixel(
-    const std::size_t x, const std::size_t y, const std::uint32_t color)
+    const size_t x, const size_t y, const std::uint32_t color)
 {
   this->gfx[x][y] = sf::Color(color);
 }
@@ -69,8 +69,8 @@ void display::render()
 {
   this->window.clear();
 
-  for (std::size_t y = 0; y < ct::gfx_height; ++y) {
-    for (std::size_t x = 0; x < ct::gfx_width; ++x) {
+  for (size_t y = 0; y < ct::gfx_height; ++y) {
+    for (size_t x = 0; x < ct::gfx_width; ++x) {
       sf::RectangleShape rect(sf::Vector2f(ct::scale, ct::scale));
       rect.setFillColor(this->gfx[x][y]);
       rect.setPosition(x * ct::scale, y * ct::scale);
