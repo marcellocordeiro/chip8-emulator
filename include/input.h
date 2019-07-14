@@ -1,11 +1,10 @@
 #pragma once
 
 #include <array>
-#include <unordered_map>
 
 #include <SFML/Window/Keyboard.hpp>
 
-#include "types.h"
+#include "common.h"
 
 namespace ct {
 constexpr auto keys_size = 16;

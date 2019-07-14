@@ -1,5 +1,8 @@
 #include "cpu.h"
 
+#include <algorithm>
+#include <fstream>
+
 namespace chip8 {
 cpu::cpu()
 {
@@ -101,8 +104,8 @@ void cpu::cycle()
 
 void cpu::execute()
 {
-  const opcode_t opcode(
-      this->memory[this->pc] << 8 | this->memory[this->pc + 1]);
+  opcode_t opcode = {static_cast<uint16_t>(
+      this->memory[this->pc] << 8 | this->memory[this->pc + 1])};
 
   switch (opcode.main) {
     case 0x0: return opcode_0x0(opcode);

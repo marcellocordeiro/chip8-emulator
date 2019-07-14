@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstdint>
 #include <random>
+
+#include "common.h"
 
 namespace chip8 {
 class random {

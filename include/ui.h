@@ -2,14 +2,6 @@
 
 #include <filesystem>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#ifdef __linux__
-#include <string>
-#endif
-
 namespace chip8 {
 void                  hide_console();
 void                  show_console();

@@ -1,5 +1,7 @@
 #include "input.h"
 
+#include <unordered_map>
+
 namespace chip8 {
 input::input()
 {

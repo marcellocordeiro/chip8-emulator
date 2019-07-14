@@ -1,5 +1,13 @@
 #include "ui.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#ifdef __linux__
+#include <string>
+#endif
+
 namespace chip8 {
 void message_box(const char* message)
 {

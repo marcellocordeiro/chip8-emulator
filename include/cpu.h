@@ -1,17 +1,16 @@
 #pragma once
 
-#include <algorithm>
 #include <array>
-#include <cstdint>
 #include <filesystem>
-#include <fstream>
+
+#include "bit_field.hpp"
+#include "common.h"
 
 #include "audio.h"
 #include "display.h"
 #include "input.h"
 #include "random.h"
 #include "timer.h"
-#include "types.h"
 
 namespace ct {
 // cpu
@@ -38,7 +37,7 @@ namespace chip8 {
 class cpu {
 public:
   cpu();
-  
+
   void set_component(chip8::display&);
   void set_component(chip8::audio&);
   void set_component(chip8::input&);
@@ -48,23 +47,18 @@ public:
   void cycle();
 
 private:
-  struct opcode_t {
-    uint8_t  main : 4;
-    uint8_t  x : 4;
-    uint8_t  y : 4;
-    uint8_t  n : 4;
-    uint16_t nnn : 12;
-    uint8_t  kk : 8;
+  union opcode_t {
+    template <size_t position, size_t bits>
+    using bf_16 = lib::bit_field<uint16_t, position, bits>;
 
-    opcode_t(const uint16_t raw)
-    {
-      main = (raw & 0xF000) >> 12;
-      x    = (raw & 0x0F00) >> 8;
-      y    = (raw & 0x00F0) >> 4;
-      n    = raw & 0x000F;
-      nnn  = raw & 0x0FFF;
-      kk   = raw & 0x00FF;
-    }
+    uint16_t raw = 0;
+
+    bf_16<12, 4> main;
+    bf_16<8, 4>  x;
+    bf_16<4, 4>  y;
+    bf_16<0, 4>  n;
+    bf_16<0, 12> nnn;
+    bf_16<0, 8>  kk;
   };
 
   chip8::display* display = nullptr;

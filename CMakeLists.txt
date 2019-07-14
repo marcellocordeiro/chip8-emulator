@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.14)
 
 project(chip8-emulator VERSION 1.0.0)
 
@@ -8,13 +8,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
 #    Dependencies    #
 ######################
 
-include_directories("include")
-
 find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
+
+add_subdirectory("lib")
 
 ######################
 #    Source files    #
 ######################
+
+include_directories("include")
 
 file(GLOB SOURCE_FILES
     "src/*.cpp"
@@ -24,7 +26,7 @@ file(GLOB SOURCE_FILES
 #     Executable     #
 ######################
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(chip8-emulator ${SOURCE_FILES})
 
 ######################
 #   Compiler flags   #
@@ -35,10 +37,6 @@ set(GNU_FLAGS
     -Wall
     -Wextra
     -pedantic
-    -Wuseless-cast
-    -Wshadow
-    -Wformat=2
-    -Wdisabled-optimization
 )
 
 set(MSVC_FLAGS
@@ -46,17 +44,21 @@ set(MSVC_FLAGS
     /W4
     /permissive-
     /diagnostics:caret
-    /Zi
 )
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-
-target_compile_options(${PROJECT_NAME} PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:${MSVC_FLAGS}>
-    $<$<CXX_COMPILER_ID:GNU>:${GNU_FLAGS}>
+set_target_properties(
+    chip8-emulator
+    PROPERTIES CXX_STANDARD 17
+               CXX_STANDARD_REQUIRED YES
+               CXX_EXTENSIONS NO
 )
 
-if (MSVC)
+if(UNIX)
+    target_compile_options(chip8-emulator PRIVATE ${GNU_FLAGS})
+elseif(MSVC)
+    target_compile_options(chip8-emulator PRIVATE ${MSVC_FLAGS})
+
+    # Remove for CMake 3.15 (CMP0092)
     string(REGEX REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 endif()
 
@@ -64,11 +66,5 @@ endif()
 # Link libraries #
 ##################
 
-if(UNIX)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address,undefined)
-        target_link_libraries(${PROJECT_NAME} asan ubsan)
-    endif()
-endif()
-
-target_link_libraries(${PROJECT_NAME} sfml-graphics sfml-audio)
+target_link_libraries(chip8-emulator PRIVATE chip8-emulator-lib)
+target_link_libraries(chip8-emulator PRIVATE sfml-graphics sfml-audio)

@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "types.h"
+#include "common.h"
 
 namespace ct {
 // array sizes
