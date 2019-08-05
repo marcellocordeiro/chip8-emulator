@@ -22,7 +22,7 @@ Generate the solution files using CMake and build it. It has been tested on Wind
   - SFML 2.5.1
 
 - Tools:
-  - CMake 3.14
+  - CMake 3.15
 
 ## Running
 
