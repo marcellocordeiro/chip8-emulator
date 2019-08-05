@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace chip8 {
+namespace lib {
 class timer {
 public:
   float elapsed_time();
@@ -12,4 +12,4 @@ private:
   std::chrono::high_resolution_clock::time_point start =
       std::chrono::high_resolution_clock::now();
 };
-}  // namespace chip8
+}  // namespace lib

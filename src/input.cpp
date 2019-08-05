@@ -111,23 +111,24 @@ input::input()
     {"Pause",     sf::Keyboard::Key::Pause}
   };
 
-  this->mapping = {key_bindings.at("Num1"), key_bindings.at("Num2"), key_bindings.at("Num3"), key_bindings.at("Num4"),
-                   key_bindings.at("Q"),    key_bindings.at("W"),    key_bindings.at("E"),    key_bindings.at("R"),
-                   key_bindings.at("A"),    key_bindings.at("S"),    key_bindings.at("D"),    key_bindings.at("F"),
-                   key_bindings.at("Z"),    key_bindings.at("X"),    key_bindings.at("C"),    key_bindings.at("V")
+  mapping = {
+      key_bindings.at("Num1"), key_bindings.at("Num2"), key_bindings.at("Num3"), key_bindings.at("Num4"),
+      key_bindings.at("Q"),    key_bindings.at("W"),    key_bindings.at("E"),    key_bindings.at("R"),
+      key_bindings.at("A"),    key_bindings.at("S"),    key_bindings.at("D"),    key_bindings.at("F"),
+      key_bindings.at("Z"),    key_bindings.at("X"),    key_bindings.at("C"),    key_bindings.at("V")
   };
   // clang-format on
 }
 
 void input::update_keys()
 {
-  for (auto i = 0; i < ct::keys_size; ++i) {
-    this->keys[i] = sf::Keyboard::isKeyPressed(this->mapping[i]);
+  for (size_t i = 0; i < keys.size(); ++i) {
+    keys[i] = sf::Keyboard::isKeyPressed(mapping[i]);
   }
 }
 
-bool input::operator[](const std::size_t i) const
+bool input::operator[](size_t i) const
 {
-  return this->keys[i];
+  return keys[i];
 }
 }  // namespace chip8

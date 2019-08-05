@@ -3,8 +3,13 @@
 #include <algorithm>
 #include <fstream>
 
+#include "audio.h"
+#include "emulator.h"
+#include "input.h"
+#include "io.h"
+
 namespace chip8 {
-cpu::cpu()
+cpu::cpu(chip8::emulator& emulator_ref) : emulator(emulator_ref)
 {
   constexpr std::array<uint8_t, 80> font_set = {
       0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
@@ -25,39 +30,28 @@ cpu::cpu()
       0xF0, 0x80, 0xF0, 0x80, 0x80   // F
   };
 
-  std::copy(font_set.begin(), font_set.end(), this->memory.begin());
+  std::copy(font_set.begin(), font_set.end(), memory.begin());
 }
 
-void cpu::set_component(chip8::display& ref)
+void cpu::power_on()
 {
-  this->display = &ref;
-}
-
-void cpu::set_component(chip8::audio& ref)
-{
-  this->sound = &ref;
-}
-
-void cpu::set_component(chip8::input& ref)
-{
-  this->keys = &ref;
+  reset();
 }
 
 void cpu::reset()
 {
-  this->display->clear();
+  emulator.get_io()->clear();
 
-  std::fill(
-      this->memory.begin() + 80, this->memory.end(), static_cast<uint8_t>(0));
-  this->stack = {};
-  this->V     = {};
+  std::fill(memory.begin() + 80, memory.end(), static_cast<uint8_t>(0));
+  stack = {};
+  V     = {};
 
-  this->pc = 0x200;
-  this->sp = 0;
-  this->I  = 0;
+  pc = 0x200;
+  sp = 0;
+  I  = 0;
 
-  this->delay_timer = 0;
-  this->sound_timer = 0;
+  delay_timer = 0;
+  sound_timer = 0;
 }
 
 void cpu::load(const std::filesystem::path& rom_file)
@@ -70,42 +64,42 @@ void cpu::load(const std::filesystem::path& rom_file)
     throw std::runtime_error("Can't open the ROM");
   }
 
-  rom.read(reinterpret_cast<char*>(this->memory.data()) + 0x200, rom_size);
+  rom.read(reinterpret_cast<char*>(memory.data()) + 0x200, rom_size);
 
   rom.close();
 }
 
 void cpu::cycle()
 {
-  if (this->cycle_timer.elapsed_time() >= 1.0f / ct::cpu_clock) {
-    this->execute();
-    this->cycle_timer.restart();
+  if (cycle_timer.elapsed_time() >= 1.0f / ct::cpu_clock) {
+    execute();
+    cycle_timer.restart();
   }
 
-  if (this->timers_timer.elapsed_time() >= 1.0f / ct::cpu_counters_clock) {
-    this->keys->update_keys();
-    this->display->render();
+  if (timers_timer.elapsed_time() >= 1.0f / ct::cpu_counters_clock) {
+    emulator.get_input()->update_keys();
+    emulator.get_io()->draw();
 
-    if (this->delay_timer > 0) {
-      --this->delay_timer;
+    if (delay_timer > 0) {
+      --delay_timer;
     }
 
-    if (this->sound_timer > 0) {
-      if (this->sound_timer == 1) {
-        this->sound->play();
+    if (sound_timer > 0) {
+      if (sound_timer == 1) {
+        emulator.get_audio()->play();
       }
 
-      --this->sound_timer;
+      --sound_timer;
     }
 
-    this->timers_timer.restart();
+    timers_timer.restart();
   }
 }
 
 void cpu::execute()
 {
-  opcode_t opcode = {static_cast<uint16_t>(
-      this->memory[this->pc] << 8 | this->memory[this->pc + 1])};
+  const opcode_t opcode = {
+      static_cast<uint16_t>(memory[pc] << 8 | memory[pc + 1])};
 
   switch (opcode.main) {
     case 0x0: return opcode_0x0(opcode);
@@ -181,227 +175,227 @@ void cpu::opcode_0xF(const opcode_t& opcode)
 // CLS - clear display [0x00E0]
 void cpu::cls()
 {
-  this->display->clear();
+  emulator.get_io()->clear();
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // RET - return from a subroutine [0x00EE]
 void cpu::ret()
 {
-  --this->sp;
-  this->pc = this->stack[this->sp];
+  --sp;
+  pc = stack[sp];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // JP addr - jump to location nnn [0x1nnn]
 void cpu::jmp_addr(const opcode_t& opcode)
 {
-  this->pc = opcode.nnn;
+  pc = opcode.nnn;
 }
 
 // CALL addr - call subroutine at nnn [0x2nnn]
 void cpu::call_addr(const opcode_t& opcode)
 {
-  this->stack[this->sp] = this->pc;
-  ++this->sp;
-  this->pc = opcode.nnn;
+  stack[sp] = pc;
+  ++sp;
+  pc = opcode.nnn;
 }
 
 // SE Vx, byte - skip next instruction if Vx = kk [0x3xkk]
 void cpu::se_Vx_byte(const opcode_t& opcode)
 {
-  if (this->V[opcode.x] == opcode.kk) {
-    this->pc += 2;
+  if (V[opcode.x] == opcode.kk) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SNE Vx, byte - skip next instruction if Vx != kk [0x4xkk]
 void cpu::sne_Vx_byte(const opcode_t& opcode)
 {
-  if (this->V[opcode.x] != opcode.kk) {
-    this->pc += 2;
+  if (V[opcode.x] != opcode.kk) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SE Vx, Vy - skip next instruction if Vx = Vy [0x5xy0]
 void cpu::se_Vx_Vy(const opcode_t& opcode)
 {
-  if (this->V[opcode.x] == this->V[opcode.y]) {
-    this->pc += 2;
+  if (V[opcode.x] == V[opcode.y]) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD Vx, byte - set Vx = kk [0x6xkk]
 void cpu::ld_Vx_byte(const opcode_t& opcode)
 {
-  this->V[opcode.x] = opcode.kk;
+  V[opcode.x] = static_cast<uint8_t>(opcode.kk);
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // ADD Vx, byte - set Vx = Vx + kk [0x7xkk]
 void cpu::add_Vx_byte(const opcode_t& opcode)
 {
-  this->V[opcode.x] += opcode.kk;
+  V[opcode.x] += static_cast<uint8_t>(opcode.kk);
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD Vx, Vy - set Vx = Vy [0x8xy0]
 void cpu::ld_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[opcode.x] = this->V[opcode.y];
+  V[opcode.x] = V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // OR Vx, Vy - set Vx = Vx OR Vy [0x8xy1]
 void cpu::or_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[opcode.x] |= this->V[opcode.y];
+  V[opcode.x] |= V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // AND Vx, Vy - set Vx = Vx AND Vy [0x8xy2]
 void cpu::and_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[opcode.x] &= this->V[opcode.y];
+  V[opcode.x] &= V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // XOR Vx, Vy - set Vx = Vx XOR Vy [0x8xy3]
 void cpu::xor_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[opcode.x] ^= this->V[opcode.y];
+  V[opcode.x] ^= V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // ADD Vx, Vy - set Vx = Vx + Vy, set VF = carry [0x8xy4]
 void cpu::add_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[0xF] = this->V[opcode.y] > (0xFF - this->V[opcode.x]);
-  this->V[opcode.x] += this->V[opcode.y];
+  V[0xF] = V[opcode.y] > (0xFF - V[opcode.x]);
+  V[opcode.x] += V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SUB Vx, Vy - set Vx = Vx - Vy, set VF = NOT borrow [0x8xy5]
 void cpu::sub_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[0xF] = this->V[opcode.x] >= this->V[opcode.y];
-  this->V[opcode.x] -= this->V[opcode.y];
+  V[0xF] = V[opcode.x] >= V[opcode.y];
+  V[opcode.x] -= V[opcode.y];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SHR Vx {,Vy} - set Vx = Vx SHR 1 [0x8xy6]
 void cpu::shr_Vx(const opcode_t& opcode)
 {
-  this->V[0xF] = this->V[opcode.x] & 0x1;
-  this->V[opcode.x] >>= 1;
+  V[0xF] = V[opcode.x] & 0x1;
+  V[opcode.x] >>= 1;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SUBN Vx, Vy - set Vx = Vy - Vx, set VF = NOT borrow [0x8xy7]
 void cpu::subn_Vx_Vy(const opcode_t& opcode)
 {
-  this->V[0xF]      = this->V[opcode.y] >= this->V[opcode.x];
-  this->V[opcode.x] = this->V[opcode.y] - this->V[opcode.x];
+  V[0xF]      = V[opcode.y] >= V[opcode.x];
+  V[opcode.x] = V[opcode.y] - V[opcode.x];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SHL Vx {,Vy} - set Vx = Vx SHL 1 [0x8xyE]
 void cpu::shl_Vx(const opcode_t& opcode)
 {
-  this->V[0xF] = this->V[opcode.x] >> 7;
-  this->V[opcode.x] <<= 1;
+  V[0xF] = V[opcode.x] >> 7;
+  V[opcode.x] <<= 1;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SNE Vx, Vy - skip next instruction if Vx != Vy [0x9xy0]
 void cpu::sne_Vx_Vy(const opcode_t& opcode)
 {
-  if (this->V[opcode.x] != this->V[opcode.y]) {
-    this->pc += 2;
+  if (V[opcode.x] != V[opcode.y]) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD I, addr - set I = nnn [0xAnnn]
 void cpu::ld_I_addr(const opcode_t& opcode)
 {
-  this->I = opcode.nnn;
+  I = opcode.nnn;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // JP V0, addr - jump to location nnn + V0 [0xBnnn]
 void cpu::jmp_V0_addr(const opcode_t& opcode)
 {
-  this->pc = opcode.nnn + this->V[0x0];
+  pc = opcode.nnn + V[0x0];
 }
 
 // RND Vx, byte - set Vx = random byte AND kk [0xCxkk]
 void cpu::rnd_Vx_byte(const opcode_t& opcode)
 {
-  this->V[opcode.x] = opcode.kk & this->rng.gen();
+  V[opcode.x] = opcode.kk & rng.gen();
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // DRW Vx, Vy, nibble - display n-byte sprite starting at memory location I at
 // (Vx, Vy), set VF = collision. [0xDxyn]
 void cpu::drw_Vx_Vy_nibble(const opcode_t& opcode)
 {
-  uint8_t height = opcode.n;
+  uint8_t height = static_cast<uint8_t>(opcode.n);
 
   for (uint8_t i = 0; i < height; ++i) {
-    uint8_t pixel = this->memory[this->I + i];
-    uint8_t y     = (this->V[opcode.y] + i) % ct::screen_height;
+    uint8_t pixel = memory[I + i];
+    uint8_t y     = (V[opcode.y] + i) % ct::screen_height;
 
     for (uint8_t j = 0; j < 8; ++j) {
-      uint8_t x = (this->V[opcode.x] + j) % ct::screen_width;
+      uint8_t x = (V[opcode.x] + j) % ct::screen_width;
 
       if ((pixel & (0x80 >> j)) != 0) {
-        auto current_pixel = this->display->get_pixel(x, y);
-        this->V[0xF]       = (current_pixel == ct::main_colour);
+        auto current_pixel = emulator.get_io()->get_pixel(x, y);
+        V[0xF]             = (current_pixel == ct::main_colour);
 
         if (current_pixel == ct::main_colour) {
-          this->display->set_pixel(x, y, ct::background_colour);
+          emulator.get_io()->set_pixel(x, y, ct::background_colour);
         } else {
-          this->display->set_pixel(x, y, ct::main_colour);
+          emulator.get_io()->set_pixel(x, y, ct::main_colour);
         }
       }
     }
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SKP Vx - skip next instruction if key
 // with the value of Vx is pressed [0xEx9E]
 void cpu::skp_Vx(const opcode_t& opcode)
 {
-  if ((*this->keys)[this->V[opcode.x]]) {
-    this->pc += 2;
+  if ((*emulator.get_input())[V[opcode.x]]) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // SKNP Vx - skip next instruction if key
@@ -409,28 +403,28 @@ void cpu::skp_Vx(const opcode_t& opcode)
 // [0xExA1]
 void cpu::sknp_Vx(const opcode_t& opcode)
 {
-  if (!(*this->keys)[this->V[opcode.x]]) {
-    this->pc += 2;
+  if (!(*emulator.get_input())[V[opcode.x]]) {
+    pc += 2;
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD Vx, DT - set Vx = delay timer value [0xFx07]
 void cpu::ld_Vx_DT(const opcode_t& opcode)
 {
-  this->V[opcode.x] = this->delay_timer;
+  V[opcode.x] = delay_timer;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD Vx, K - wait for a key press, store the value of the key in Vx [0xFx0A]
 void cpu::ld_Vx_K(const opcode_t& opcode)
 {
   for (uint8_t i = 0; i < ct::keys_size; ++i) {
-    if ((*this->keys)[i]) {
-      this->V[opcode.x] = i;
-      this->pc += 2;
+    if ((*emulator.get_input())[i]) {
+      V[opcode.x] = i;
+      pc += 2;
       return;
     }
   }
@@ -439,45 +433,45 @@ void cpu::ld_Vx_K(const opcode_t& opcode)
 // LD DT, Vx - set delay timer = Vx [0xFx15]
 void cpu::ld_DT_Vx(const opcode_t& opcode)
 {
-  this->delay_timer = this->V[opcode.x];
+  delay_timer = V[opcode.x];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD ST, Vx - set sound timer = Vx [0xFx18]
 void cpu::ld_ST_Vx(const opcode_t& opcode)
 {
-  this->sound_timer = this->V[opcode.x];
+  sound_timer = V[opcode.x];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // ADD I, Vx - set I = I + Vx [0xFx1E]
 void cpu::add_I_Vx(const opcode_t& opcode)
 {
-  // this->V[0xF] = (this->I + this->V[opcode.x] > 0xFFF);
-  this->I += this->V[opcode.x];
+  // V[0xF] = (I + V[opcode.x] > 0xFFF);
+  I += V[opcode.x];
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD F, Vx - set I = location of sprite for digit Vx [0xFx29]
 void cpu::ld_F_Vx(const opcode_t& opcode)
 {
-  this->I = this->V[opcode.x] * ct::char_size;
+  I = V[opcode.x] * ct::char_size;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD B, Vx - store BCD representation of Vx
 // in memory locations I, I + 1, and I + 2 [0xFx33]
 void cpu::ld_B_Vx(const opcode_t& opcode)
 {
-  this->memory[this->I]     = this->V[opcode.x] / 100;
-  this->memory[this->I + 1] = (this->V[opcode.x] / 10) % 10;
-  this->memory[this->I + 2] = this->V[opcode.x] % 10;
+  memory[I]     = V[opcode.x] / 100;
+  memory[I + 1] = (V[opcode.x] / 10) % 10;
+  memory[I + 2] = V[opcode.x] % 10;
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD [I], Vx - store registers V0 through Vx
@@ -485,10 +479,10 @@ void cpu::ld_B_Vx(const opcode_t& opcode)
 void cpu::ld_I_Vx(const opcode_t& opcode)
 {
   for (int i = 0; i <= opcode.x; ++i) {
-    this->memory[this->I + i] = this->V[i];
+    memory[I + i] = V[i];
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 
 // LD Vx, [I] - read registers V0 through Vx
@@ -496,9 +490,9 @@ void cpu::ld_I_Vx(const opcode_t& opcode)
 void cpu::ld_Vx_I(const opcode_t& opcode)
 {
   for (int i = 0; i <= opcode.x; ++i) {
-    this->V[i] = this->memory[this->I + i];
+    V[i] = memory[I + i];
   }
 
-  this->pc += 2;
+  pc += 2;
 }
 }  // namespace chip8

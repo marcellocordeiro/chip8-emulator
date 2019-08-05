@@ -5,12 +5,9 @@
 
 #include "bit_field.hpp"
 #include "common.h"
-
-#include "audio.h"
-#include "display.h"
-#include "input.h"
 #include "random.h"
 #include "timer.h"
+#include "types/forward_decl.h"
 
 namespace ct {
 // cpu
@@ -36,12 +33,9 @@ constexpr auto main_colour       = 0xFFFFFFFF;
 namespace chip8 {
 class cpu {
 public:
-  cpu();
+  cpu(chip8::emulator&);
 
-  void set_component(chip8::display&);
-  void set_component(chip8::audio&);
-  void set_component(chip8::input&);
-
+  void power_on();
   void reset();
   void load(const std::filesystem::path&);
   void cycle();
@@ -61,16 +55,15 @@ private:
     bf_16<0, 8>  kk;
   };
 
-  chip8::display* display = nullptr;
-  chip8::audio*   sound   = nullptr;
-  chip8::input*   keys    = nullptr;
-  chip8::timer    cycle_timer;
-  chip8::timer    timers_timer;
-  chip8::random   rng;
+  chip8::emulator& emulator;
 
-  std::array<uint8_t, ct::memory_size> memory = {};
-  std::array<uint16_t, ct::stack_size> stack  = {};
-  std::array<uint8_t, ct::V_size>      V      = {};
+  lib::timer  cycle_timer;
+  lib::timer  timers_timer;
+  lib::random rng;
+
+  std::array<uint8_t, ct::memory_size> memory{};
+  std::array<uint16_t, ct::stack_size> stack{};
+  std::array<uint8_t, ct::V_size>      V{};
 
   uint16_t pc          = 0x200;
   uint8_t  sp          = 0;

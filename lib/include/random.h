@@ -4,7 +4,7 @@
 
 #include "common.h"
 
-namespace chip8 {
+namespace lib {
 class random {
 public:
   uint8_t gen();
@@ -14,4 +14,4 @@ private:
   static inline std::mt19937                       mt{rd()};
   static inline std::uniform_int_distribution<int> dist{0, 255};
 };
-}  // namespace chip8
+}  // namespace lib

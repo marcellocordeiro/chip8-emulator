@@ -15,7 +15,7 @@ class input {
 public:
   input();
   void update_keys();
-  bool operator[](const size_t) const;
+  bool operator[](size_t) const;
 
 private:
   std::array<sf::Keyboard::Key, ct::keys_size> mapping;

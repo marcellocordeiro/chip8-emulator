@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "system_utils.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -8,7 +8,7 @@
 #include <string>
 #endif
 
-namespace chip8 {
+namespace lib {
 void message_box(const char* message)
 {
 #ifdef _WIN32
@@ -99,4 +99,4 @@ std::filesystem::path select_rom()
 
   return std::filesystem::current_path().parent_path() / "roms" / "BRIX";
 }
-}  // namespace chip8
+}  // namespace lib

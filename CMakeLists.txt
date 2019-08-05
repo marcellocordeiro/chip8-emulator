@@ -1,70 +1,38 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.15)
 
-project(chip8-emulator VERSION 1.0.0)
+project(chip8-emulator)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/bin)
+# Setting up the target
 
-######################
-#    Dependencies    #
-######################
-
-find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
-
-add_subdirectory("lib")
-
-######################
-#    Source files    #
-######################
-
-include_directories("include")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 file(GLOB SOURCE_FILES
-    "src/*.cpp"
+  "src/*.cpp"
 )
-
-######################
-#     Executable     #
-######################
 
 add_executable(chip8-emulator ${SOURCE_FILES})
 
-######################
-#   Compiler flags   #
-######################
+target_include_directories(chip8-emulator PRIVATE "include")
 
-set(GNU_FLAGS
-    -Werror
-    -Wall
-    -Wextra
-    -pedantic
-)
+# Dependencies
 
-set(MSVC_FLAGS
-    /WX
-    /W4
-    /permissive-
-    /diagnostics:caret
-)
-
-set_target_properties(
-    chip8-emulator
-    PROPERTIES CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED YES
-               CXX_EXTENSIONS NO
-)
-
-if(UNIX)
-    target_compile_options(chip8-emulator PRIVATE ${GNU_FLAGS})
-elseif(MSVC)
-    target_compile_options(chip8-emulator PRIVATE ${MSVC_FLAGS})
-
-    # Remove for CMake 3.15 (CMP0092)
-    string(REGEX REPLACE "/W3" "/W4" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-endif()
-
-##################
-# Link libraries #
-##################
-
+add_subdirectory("lib")
 target_link_libraries(chip8-emulator PRIVATE chip8-emulator-lib)
+
+find_package(SFML 2.5 COMPONENTS graphics audio REQUIRED)
 target_link_libraries(chip8-emulator PRIVATE sfml-graphics sfml-audio)
+
+# Compiler settings
+
+set_target_properties(chip8-emulator
+  PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
+
+target_compile_options(chip8-emulator
+  PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /diagnostics:caret>
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -pedantic -Wuseless-cast -Wshadow -Wformat=2 -Wdisabled-optimization>
+)
