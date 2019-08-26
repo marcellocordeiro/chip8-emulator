@@ -11,7 +11,7 @@
 namespace chip8 {
 cpu::cpu(chip8::emulator& emulator_ref) : emulator(emulator_ref)
 {
-  constexpr std::array<uint8_t, 80> font_set = {
+  constexpr std::array<uint8_t, 80> font_set{
       0xF0, 0x90, 0x90, 0x90, 0xF0,  // 0
       0x20, 0x60, 0x20, 0x20, 0x70,  // 1
       0xF0, 0x10, 0xF0, 0x80, 0xF0,  // 2
@@ -98,7 +98,7 @@ void cpu::cycle()
 
 void cpu::execute()
 {
-  const opcode_t opcode = {
+  const opcode_t opcode{
       static_cast<uint16_t>(memory[pc] << 8 | memory[pc + 1])};
 
   switch (opcode.main) {

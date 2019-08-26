@@ -31,8 +31,8 @@ set_target_properties(chip8-emulator
     CXX_EXTENSIONS NO
 )
 
-target_compile_options(chip8-emulator
-  PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive- /diagnostics:caret>
-    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -pedantic -Wuseless-cast -Wshadow -Wformat=2 -Wdisabled-optimization>
-)
+if(MSVC)
+  target_compile_options(chip8-emulator PRIVATE /WX /W4 /permissive- /diagnostics:caret)
+elseif(UNIX)
+  target_compile_options(chip8-emulator PRIVATE -Werror -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wdisabled-optimization)
+endif()
